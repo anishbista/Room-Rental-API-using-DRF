@@ -1,0 +1,59 @@
+{% extends "admin_panel/base.html" %}
+
+{% block content %}
+<div class="page-wrapper">
+    <div class="content container-fluid">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="card card-table">
+                    <div class="card-body">
+
+                        <div class="page-header">
+                            <div class="row align-items-center">
+                                <div class="col">
+                                    <h3 class="page-title">Courses</h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table
+                                class="table border-0 star-student table-hover table-center mb-0 datatable table-striped">
+                                <thead class="student-thread">
+                                    <tr>
+                                        <th>Username</th>
+                                        <th class="text-end">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    {% for user in object_list %}
+                                        <tr>
+                                            <td>
+                                                <h2>
+                                                    {{user.username}}
+                                                </h2>
+                                            </td>
+                                            <td class="text-end">
+                                                <div class="actions">
+                                                     <a href="{% url 'admin_users_update' user.id %}" class="btn btn-sm bg-success-light">
+                                                        <i class="far fa-eye"></i>
+                                                    </a> 
+                                                </div> 
+                                            </td>
+                                        </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="3">No Data</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth.models import User
+
+# from django.contrib.auth.models import User
+from accounts.models import User
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
 
@@ -14,7 +16,7 @@ def admin_login(request):
             user_obj = User.objects.filter(username=username)
             if not user_obj.exists():
                 messages.info(request, "Account not found")
-                return render(request, "login.html")
+                return render(request, "admin_panel/login.html")
 
             user_obj = authenticate(username=username, password=password)
 
@@ -23,12 +25,12 @@ def admin_login(request):
                 return redirect("/dashboard/")
 
             messages.info(request, "Invalid Password")
-            return render(request, "login.html")
-        return render(request, "login.html")
+            return render(request, "admin_panel/login.html")
+        return render(request, "admin_panel/login.html")
 
     except Exception as e:
         print(e)
 
 
 def dashboard(request):
-    return render(request, "dashboard.html")
+    return render(request, "admin_panel/dashboard.html")
