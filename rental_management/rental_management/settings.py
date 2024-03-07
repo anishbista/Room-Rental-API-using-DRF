@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,10 +27,8 @@ SECRET_KEY = "django-insecure-!8089)kmajg5=u$#eht4kudo=p+c5gm8oal*%qgw3%a+xr&hr%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["192.168.1.81", "0.0.0.0", "127.0.0.1"]
+ALLOWED_HOSTS = ["192.168.1.81", "192.168.1.67", "0.0.0.0", "127.0.0.1"]
 
-
-# Application definition
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -153,4 +152,12 @@ SIMPLE_JWT = {
 
 PASSWORD_RESET_TIMEOUT = 900  # This is used to set the time of token created while resting password through email
 
-CORS_ALLOWED_ORIGINS = ["http://127.0.0.1:5500"]
+CORS_ALLOWED_ORIGINS = ["http://127.0.0.1:5500", "http://127.0.0.1:8000"]
+
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIl_PORT = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_HOST_USER = os.environ.get("EMAIL_USER")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_PASS")
+EMAIL_USE_TLS = True

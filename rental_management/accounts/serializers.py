@@ -2,9 +2,6 @@ import re
 from django.forms import ValidationError
 from rest_framework import serializers
 from .models import User
-from django.utils.encoding import smart_str, force_bytes, DjangoUnicodeDecodeError
-from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -12,7 +9,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["email", "name", "password", "password2", "mobile_no"]
+        fields = ["email", "name", "address", "password", "password2", "mobile_no"]
         extra_kwargs = {"password": {"write_only": True}}
 
     def validate(self, data):
