@@ -2,6 +2,8 @@ import re
 from django.forms import ValidationError
 from rest_framework import serializers
 from .models import User
+import random
+from accounts.utils import Util
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -17,7 +19,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         password2 = data.get("password2")
         if password != password2:
             raise serializers.ValidationError(
-                "Password and Confirm Password doesn't match."
+                {"Password": "Password and Confirm Password doesn't match."}
             )
         if not re.match(
             "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$",
@@ -40,3 +42,22 @@ class UserLoginSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["email", "password"]
+
+
+class ForgotPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField(max_length=255)
+
+    def validate(self, attrs):
+        email = attrs.get("email")
+        if User.objects.filter(email=email).first():
+            user = User.objects.get(email=email)
+            otp = random.randint(1000, 9999)
+            data = {
+                "subject": "Forgot Password OTP",
+                "body": f"Your OTP is {otp}.",
+                "to_email": user.email,
+            }
+            Util.send_email(data)
+            return attrs
+        else:
+            raise serializers.ValidationError({"Email": "Your are not registered user"})
