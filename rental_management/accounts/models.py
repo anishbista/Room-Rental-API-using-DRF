@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
+from common.models import CommonInfo
 
 
 class UserManager(BaseUserManager):
@@ -83,3 +84,11 @@ class User(AbstractBaseUser):
 #     mobile_no = models.CharField(max_length=10)
 #     address = models.CharField(max_length=250)
 #     profile_picture = models.ImageField(upload_to="profile", blank=True, null=True)
+
+
+class OTP(CommonInfo):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="users")
+    otp = models.CharField(max_length=5)
+
+    def __str__(self):
+        return f"{self.user.email} - {self.otp}"

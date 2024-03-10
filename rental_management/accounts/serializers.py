@@ -4,6 +4,7 @@ from rest_framework import serializers
 from .models import User
 import random
 from accounts.utils import Util
+from django.contrib.sessions.models import Session
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -19,14 +20,16 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         password2 = data.get("password2")
         if password != password2:
             raise serializers.ValidationError(
-                {"Password": "Password and Confirm Password doesn't match."}
+                {"error": "Password and Confirm Password doesn't match."}
             )
         if not re.match(
             "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$",
             password,
         ):
             raise serializers.ValidationError(
-                "Password must minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character:"
+                {
+                    "error": "Password must minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character:"
+                }
             )
 
         return data
@@ -49,15 +52,36 @@ class ForgotPasswordSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         email = attrs.get("email")
-        if User.objects.filter(email=email).first():
-            user = User.objects.get(email=email)
-            otp = random.randint(1000, 9999)
-            data = {
-                "subject": "Forgot Password OTP",
-                "body": f"Your OTP is {otp}.",
-                "to_email": user.email,
-            }
-            Util.send_email(data)
+        if User.objects.filter(email=email).exists():
             return attrs
         else:
-            raise serializers.ValidationError({"Email": "Your are not registered user"})
+            raise serializers.ValidationError({"error": "Your are not registered user"})
+
+
+class VerifyOTPSerializer(serializers.Serializer):
+    email = serializers.EmailField(max_length=255)
+    otp = serializers.IntegerField()
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField(max_length=255)
+    password = serializers.CharField(max_length=128)
+
+
+# class ForgotPasswordSerializer(serializers.Serializer):
+#     email = serializers.EmailField(max_length=255)
+
+#     def validate(self, attrs):
+#         email = attrs.get("email")
+#         if User.objects.filter(email=email).first():
+#             otp = random.randint(1000, 9999)
+#             user = User.objects.get(email=email)
+#             data = {
+#                 "subject": "Forgot Password OTP",
+#                 "body": f"Your OTP is {otp}.",
+#                 "to_email": user.email,
+#             }
+#             Util.send_email(data)
+#             return attrs
+#         else:
+#             raise serializers.ValidationError({"Email": "Your are not registered user"})

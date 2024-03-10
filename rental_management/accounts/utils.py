@@ -4,12 +4,12 @@ import os
 
 class Util:
     @staticmethod
-    def send_email(data):
+    def send_email(email, otp):
         email = EmailMessage(
-            subject=data["subject"],
-            body=data["body"],
+            subject="Forgot Password OTP",
+            body=f"Your OTP is {otp}.",
             from_email=os.environ.get("EMAIL_FROM"),
-            to=[data["to_email"]],
+            to=[email],
         )
         print(os.environ.get("EMAIL_FROM"))
         email.send()
