@@ -9,21 +9,47 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('accounts', '0003_alter_user_mobile_no'),
+        ("accounts", "0003_alter_user_mobile_no"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='OTP',
+            name="OTP",
             fields=[
-                ('id', models.UUIDField(db_index=True, default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_on', models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='Created at')),
-                ('modified_on', models.DateTimeField(auto_now=True, db_index=True, verbose_name='Last modified at')),
-                ('otp', models.CharField(max_length=5)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='users', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.UUIDField(
+                        db_index=True,
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                (
+                    "created_on",
+                    models.DateTimeField(
+                        auto_now_add=True, db_index=True, verbose_name="Created at"
+                    ),
+                ),
+                (
+                    "modified_on",
+                    models.DateTimeField(
+                        auto_now=True, db_index=True, verbose_name="Last modified at"
+                    ),
+                ),
+                ("otp", models.CharField(max_length=5)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="users",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
     ]

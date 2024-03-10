@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 
 from .serializers import *
-
+from datetime import timedelta
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
@@ -12,6 +12,7 @@ from .renders import UserRenderer
 from .models import User
 from .utils import Util
 from .models import OTP
+from django.utils import timezone
 
 
 def get_tokens_for_user(user):
@@ -25,7 +26,7 @@ def get_tokens_for_user(user):
 
 
 class UserRegistrationView(APIView):
-    renderer_classes = [UserRenderer]
+    # renderer_classes = [UserRenderer]
 
     def post(self, request, format=None):
         serializer = UserRegistrationSerializer(data=request.data)
@@ -33,7 +34,7 @@ class UserRegistrationView(APIView):
             user = serializer.save()
             token = get_tokens_for_user(user)
             return Response(
-                {"token": token, "message": "Registration Successful."},
+                {"token": token, "message": "Registered Successful."},
                 status=status.HTTP_201_CREATED,
             )
         errors = serializer.errors.copy()
@@ -54,7 +55,7 @@ class UserRegistrationView(APIView):
 
 
 class UserLoginView(APIView):
-    renderer_classes = [UserRenderer]
+    # renderer_classes = [UserRenderer]
 
     def post(self, request, format=None):
         serializer = UserLoginSerializer(data=request.data)
@@ -66,7 +67,7 @@ class UserLoginView(APIView):
             print(f"user:{type(user)}")
             token = get_tokens_for_user(user)
             return Response(
-                {"token": token, "message": "Login Successful."},
+                {"token": token, "message": "Login Successfully."},
                 status=status.HTTP_200_OK,
             )
         else:
@@ -119,7 +120,7 @@ class UserLoginView(APIView):
 #         )
 #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 class GenerateOTPView(APIView):
-    renderer_classes = [UserRenderer]
+    # renderer_classes = [UserRenderer]
 
     def post(self, request, format=None):
         email = request.data.get("email")
@@ -130,7 +131,7 @@ class GenerateOTPView(APIView):
             OTP.objects.create(user=user, otp=otp)
             Util.send_email(email, otp)
             return Response(
-                {"message": "Otp sent. Please check your email"},
+                {"message": "Otp sent. Please check your email", "email": f"{email}"},
                 status=status.HTTP_200_OK,
             )
         else:
@@ -138,40 +139,77 @@ class GenerateOTPView(APIView):
                 {"message": "User not found"}, status=status.HTTP_404_NOT_FOUND
             )
 
+    def delete_expired_otps(self):
+        expired_time = timezone.now() + timedelta(minutes=1)
+        OTP.objects.filter(created_on__lt=expired_time).delete()
+
 
 class VerifyOTPView(APIView):
-    renderer_classes = [UserRenderer]
-
     def post(self, request, format=None):
         serializer = VerifyOTPSerializer(data=request.data)
-        if serializer.is_valid():
-            email = serializer.validated_data["email"]
-            otp = serializer.validated_data["otp"]
-            print(f"coming otp:{otp}")
-            # print(f"otp:{request.session['reset_password_otp']}")
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data.get("email")
+        otp = serializer.validated_data.get("otp")
 
-            if (
-                "reset_password_otp" in request.session
-                and "reset_password_email" in request.session
-            ):
-                if (
-                    request.session["reset_password_otp"] == otp
-                    and request.session["reset_password_email"] == email
-                ):
-                    del request.session["reset_password_otp"]
-                    del request.session["reset_password_email"]
-                    return Response(
-                        {"message": "OTP verified successfully."},
-                        status=status.HTTP_200_OK,
-                    )
-                else:
-                    return Response(
-                        {"message": "Invalid OTP or email."},
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
-            else:
-                return Response(
-                    {"message": "Session data not found."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+        otp_obj = OTP.objects.filter(user__email=email, otp=otp).first()
+        if otp_obj:
+            otp_obj.delete()
+            return Response(
+                {"message": "OTP verified successfully"}, status=status.HTTP_200_OK
+            )
+        else:
+            return Response(
+                {"message": "Invalid OTP"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+
+class ResetPasswordView(APIView):
+    # renderer_classes = [UserRenderer]
+
+    def post(self, request, format=None):
+        serializer = ResetPasswordSerializer(data=request.data)
+        if serializer.is_valid():
+
+            return Response(
+                {"message": "Password Changed successfully"}, status=status.HTTP_200_OK
+            )
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# class VerifyOTPView(APIView):
+#     renderer_classes = [UserRenderer]
+
+#     def post(self, request, format=None):
+#         serializer = VerifyOTPSerializer(data=request.data)
+#         if serializer.is_valid():
+#             email = serializer.validated_data["email"]
+#             otp = serializer.validated_data["otp"]
+#             print(f"coming otp:{otp}")
+#             # print(f"otp:{request.session['reset_password_otp']}")
+
+#             if (
+#                 "reset_password_otp" in request.session
+#                 and "reset_password_email" in request.session
+#             ):
+#                 if (
+#                     request.session["reset_password_otp"] == otp
+#                     and request.session["reset_password_email"] == email
+#                 ):
+#                     del request.session["reset_password_otp"]
+#                     del request.session["reset_password_email"]
+#                     return Response(
+#                         {"message": "OTP verified successfully."},
+#                         status=status.HTTP_200_OK,
+#                     )
+#                 else:
+#                     return Response(
+#                         {"message": "Invalid OTP or email."},
+#                         status=status.HTTP_400_BAD_REQUEST,
+#                     )
+#             else:
+#                 return Response(
+#                     {"message": "Session data not found."},
+#                     status=status.HTTP_400_BAD_REQUEST,
+#                 )
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
