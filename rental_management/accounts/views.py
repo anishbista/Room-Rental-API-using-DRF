@@ -9,10 +9,19 @@ from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from .renders import UserRenderer
-from .models import User
+from .models import User, OTP
 from .utils import Util
-from .models import OTP
 from django.utils import timezone
+from django.shortcuts import get_object_or_404
+
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
+from django.utils.encoding import force_str
+from django.utils.http import urlsafe_base64_decode
+from django.http import HttpResponse
 
 
 def get_tokens_for_user(user):
@@ -26,32 +35,98 @@ def get_tokens_for_user(user):
 
 
 class UserRegistrationView(APIView):
-    # renderer_classes = [UserRenderer]
-
     def post(self, request, format=None):
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             user = serializer.save()
-            token = get_tokens_for_user(user)
-            return Response(
-                {"token": token, "message": "Registered Successful."},
-                status=status.HTTP_201_CREATED,
-            )
-        errors = serializer.errors.copy()
-        print(errors)
-        # error_messages = []
-        # for field_errors in errors.values():
-        #     if isinstance(field_errors, list):
-        #         for error in field_errors:
-        #             error_messages.append(str(error))
-        #     else:
-        #         error_messages.append(str(field_errors))
-        # print(error_messages)
-        # del errors["non_field_errors"]
-        # print(errors)
-        # print("ErrorDetail" in str(errors))
+            user.is_active = False
+            user.save()
+            email = serializer.validated_data.get("email")
+            verification_link = self.generate_verification_link(request, user)
 
+            Util.send_verification_email(email, verification_link)
+            return Response(
+                {"message": "OTP has been sent to your email."},
+                status=status.HTTP_200_OK,
+            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def generate_verification_link(self, request, user):
+        current_site = get_current_site(request)
+        print(
+            f"current_site - {current_site}             current_site_domain - {current_site.domain}"
+        )
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        token = default_token_generator.make_token(user)
+        return f"http://{current_site.domain}/api/user/activate/{uid}/{token}/"
+
+
+class ActivateAccountView(APIView):
+    def get(self, request, uidb64, token):
+        print("Im in activated")
+        try:
+            uid = force_str(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            user = None
+
+        if user is not None and default_token_generator.check_token(user, token):
+            user.is_active = True
+            user.save()
+            return HttpResponse(
+                "Account activated successfully", status=status.HTTP_200_OK
+            )
+        else:
+            # Handle invalid token or user not found
+            return HttpResponse(
+                "Invalid activation link", status=status.HTTP_400_BAD_REQUEST
+            )
+
+
+class OTPVerificationView(APIView):
+    def post(self, request, format=None):
+        email = request.data.get("email")
+        otp_entered = request.data.get("otp")
+        # Get unverified OTP record
+        unverified_otp = get_object_or_404(UnverifiedOTP, email=email)
+        if unverified_otp.otp == otp_entered:
+            # OTP verified successfully, proceed with user registration
+            serializer = UserRegistrationSerializer(data=request.data)
+            if serializer.is_valid(raise_exception=True):
+                user = serializer.save()
+                return Response(
+                    {"message": "Registered successfully."},
+                    status=status.HTTP_201_CREATED,
+                )
+        return Response({"message": "Invalid OTP."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+# class UserRegistrationView(APIView):
+
+#     def post(self, request, format=None):
+#         serializer = UserRegistrationSerializer(data=request.data)
+#         if serializer.is_valid(raise_exception=True):
+#             email = serializer.validated_data.get("email")
+#             print(f"serialized validated data: {email}")
+#             user = serializer.save()
+#             token = get_tokens_for_user(user)
+#             return Response(
+#                 {"token": token, "message": "Registered Successful."},
+#                 status=status.HTTP_201_CREATED,
+#             )
+#         errors = serializer.errors.copy()
+#         print(errors)
+
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class VerifyRegisterEmailView(APIView):
+    def post(self, request, format=None):
+        email = request.data.get("email")
+        otp = str(random.randint(1000, 9999))
+        UnverifiedOTP.create(email=email, otp=otp)
+        Util.send_email(email, otp)
+        return Response({"message": "Otp sent"})
 
 
 class UserLoginView(APIView):

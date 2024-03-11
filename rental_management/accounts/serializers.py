@@ -33,16 +33,13 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     def is_valid(self, *, raise_exception=False):
         data = self.initial_data
         mobile_no = data.get("mobile_no")
-        # if mobile_no.__len__() != 10:
-        #     raise serializers.ValidationError(
-        #         {
-        #             "title": "",
-        #             "message": "",
-        #         }
-        #     )
+
+        if mobile_no and len(mobile_no) != 10:
+            raise serializers.ValidationError("Mobile no should be 10 digits:")
+
         return super().is_valid(raise_exception=raise_exception)
 
-    """def validate(self, data):
+    def validate(self, data):
         password = data.get("password")
         password2 = data.get("password2")
         mobile_no = data.get("mobile_no")
@@ -64,7 +61,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Mobile no should be 10 digits:")
 
         return data
-"""
 
     def create(self, validate_data):
 

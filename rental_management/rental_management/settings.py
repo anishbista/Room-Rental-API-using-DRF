@@ -94,12 +94,12 @@ DATABASES = {
 
 
 REST_FRAMEWORK = {
-    # "DEFAULT_AUTHENTICATION_CLASSES": (
-    #     "rest_framework_simplejwt.authentication.JWTAuthentication",
-    # ),
-    # "DEFAULT_RENDERER_CLASSES": [
-    #     "rest_framework.renderers.JSONRenderer",
-    # ],  # To view repsonse data in json format rather than rest_framework ui
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
+    ],  # To view repsonse data in json format rather than rest_framework ui
     "EXCEPTION_HANDLER": "drf_standardized_errors.handler.exception_handler",
 }
 
