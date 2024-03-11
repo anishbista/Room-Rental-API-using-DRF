@@ -15,4 +15,5 @@ urlpatterns = [
     ),
     path("dj-admin/", admin.site.urls),
     path("api/user/", include("accounts.urls")),
+    path("api/room/", include("room.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

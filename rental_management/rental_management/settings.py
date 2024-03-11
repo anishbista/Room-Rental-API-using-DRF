@@ -40,10 +40,12 @@ INSTALLED_APPS = [
     # local
     "accounts",
     "customadmin",
+    "room",
     # 3rd party
     "corsheaders",
     "rest_framework",
     "rest_framework_simplejwt",
+    "drf_standardized_errors",
 ]
 
 AUTH_USER_MODEL = "accounts.User"
@@ -95,9 +97,10 @@ REST_FRAMEWORK = {
     # "DEFAULT_AUTHENTICATION_CLASSES": (
     #     "rest_framework_simplejwt.authentication.JWTAuthentication",
     # ),
-    "DEFAULT_RENDERER_CLASSES": (
-        "rest_framework.renderers.JSONRenderer",
-    ),  # To view repsonse data in json format rather than rest_framework ui
+    # "DEFAULT_RENDERER_CLASSES": [
+    #     "rest_framework.renderers.JSONRenderer",
+    # ],  # To view repsonse data in json format rather than rest_framework ui
+    "EXCEPTION_HANDLER": "drf_standardized_errors.handler.exception_handler",
 }
 
 # Password validation
@@ -137,7 +140,7 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 MEDIA_URL = "media/"
-MEDIA_ROOT = [BASE_DIR / "media"]
+MEDIA_ROOT = BASE_DIR / "media"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

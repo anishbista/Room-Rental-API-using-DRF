@@ -8,19 +8,20 @@ from django.core.validators import MinLengthValidator
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
-    password2 = serializers.CharField(style={"input_type": "password"}, write_only=True)
 
-    mobile_no = serializers.CharField(
-        max_length=10,
-        validators=[
-            MinLengthValidator(
-                10, message="Mobile number should be exactly 10 digits."
-            ),
-        ],
-        error_messages={
-            "max_length": "Mobile number should be exactly 10 digits.",
-        },
-    )
+    # mobile_no = serializers.CharField(
+    #     max_length=10,
+    #     # validators=[
+    #     #     MinLengthValidator(
+    #     #         10, message="Mobile number should be exactly 10 digits."
+    #     #     ),
+    #     # ],
+    #     # error_messages={
+    #     #     "max_length": "Mobile number should be exactly 10 digits.",
+    #     # },
+    # )
+
+    password2 = serializers.CharField(style={"input_type": "password"}, write_only=True)
 
     class Meta:
         model = User
@@ -29,7 +30,19 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             "password": {"write_only": True},
         }
 
-    def validate(self, data):
+    def is_valid(self, *, raise_exception=False):
+        data = self.initial_data
+        mobile_no = data.get("mobile_no")
+        # if mobile_no.__len__() != 10:
+        #     raise serializers.ValidationError(
+        #         {
+        #             "title": "",
+        #             "message": "",
+        #         }
+        #     )
+        return super().is_valid(raise_exception=raise_exception)
+
+    """def validate(self, data):
         password = data.get("password")
         password2 = data.get("password2")
         mobile_no = data.get("mobile_no")
@@ -51,6 +64,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Mobile no should be 10 digits:")
 
         return data
+"""
 
     def create(self, validate_data):
 

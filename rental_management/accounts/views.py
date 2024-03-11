@@ -30,7 +30,7 @@ class UserRegistrationView(APIView):
 
     def post(self, request, format=None):
         serializer = UserRegistrationSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=False):
+        if serializer.is_valid(raise_exception=True):
             user = serializer.save()
             token = get_tokens_for_user(user)
             return Response(
