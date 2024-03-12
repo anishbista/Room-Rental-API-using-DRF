@@ -28,8 +28,16 @@ def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(
         user,
     )
+
+    token_payload = {
+        "email": user.email,
+        "name": user.name,
+        "mobile_no": user.mobile_no,
+    }
+    # access_token = str(refresh.access_token)
+    refresh.payload.update(token_payload)
+
     return {
-        "refresh": str(refresh),
         "access": str(refresh.access_token),
     }
 
@@ -39,6 +47,8 @@ class UserRegistrationView(APIView):
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             user = serializer.save()
+
+            print(f"User after serializing {user}")
             user.is_active = False
             user.save()
             email = serializer.validated_data.get("email")
@@ -46,7 +56,9 @@ class UserRegistrationView(APIView):
 
             Util.send_verification_email(email, verification_link)
             return Response(
-                {"message": "OTP has been sent to your email."},
+                {
+                    "message": "Link has been sent to your email. Click the link to verify."
+                },
                 status=status.HTTP_200_OK,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -83,22 +95,22 @@ class ActivateAccountView(APIView):
             )
 
 
-class OTPVerificationView(APIView):
-    def post(self, request, format=None):
-        email = request.data.get("email")
-        otp_entered = request.data.get("otp")
-        # Get unverified OTP record
-        unverified_otp = get_object_or_404(UnverifiedOTP, email=email)
-        if unverified_otp.otp == otp_entered:
-            # OTP verified successfully, proceed with user registration
-            serializer = UserRegistrationSerializer(data=request.data)
-            if serializer.is_valid(raise_exception=True):
-                user = serializer.save()
-                return Response(
-                    {"message": "Registered successfully."},
-                    status=status.HTTP_201_CREATED,
-                )
-        return Response({"message": "Invalid OTP."}, status=status.HTTP_400_BAD_REQUEST)
+# class OTPVerificationView(APIView):
+#     def post(self, request, format=None):
+#         email = request.data.get("email")
+#         otp_entered = request.data.get("otp")
+#         # Get unverified OTP record
+#         unverified_otp = get_object_or_404(UnverifiedOTP, email=email)
+#         if unverified_otp.otp == otp_entered:
+#             # OTP verified successfully, proceed with user registration
+#             serializer = UserRegistrationSerializer(data=request.data)
+#             if serializer.is_valid(raise_exception=True):
+#                 user = serializer.save()
+#                 return Response(
+#                     {"message": "Registered successfully."},
+#                     status=status.HTTP_201_CREATED,
+#                 )
+#         return Response({"message": "Invalid OTP."}, status=status.HTTP_400_BAD_REQUEST)
 
 
 # class UserRegistrationView(APIView):
@@ -120,13 +132,13 @@ class OTPVerificationView(APIView):
 #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class VerifyRegisterEmailView(APIView):
-    def post(self, request, format=None):
-        email = request.data.get("email")
-        otp = str(random.randint(1000, 9999))
-        UnverifiedOTP.create(email=email, otp=otp)
-        Util.send_email(email, otp)
-        return Response({"message": "Otp sent"})
+# class VerifyRegisterEmailView(APIView):
+#     def post(self, request, format=None):
+#         email = request.data.get("email")
+#         otp = str(random.randint(1000, 9999))
+#         UnverifiedOTP.create(email=email, otp=otp)
+#         Util.send_email(email, otp)
+#         return Response({"message": "Otp sent"})
 
 
 class UserLoginView(APIView):
@@ -137,20 +149,29 @@ class UserLoginView(APIView):
         serializer.is_valid(raise_exception=True)
         email = serializer.data.get("email")
         password = serializer.data.get("password")
-        user = authenticate(email=email, password=password)
-        if user:
-            print(f"user:{type(user)}")
-            token = get_tokens_for_user(user)
-            return Response(
-                {"token": token, "message": "Login Successfully."},
-                status=status.HTTP_200_OK,
-            )
+
+        registered_user = User.objects.filter(email=email).first()
+        if registered_user.is_active:
+            user = authenticate(email=email, password=password)
+            if user:
+                print(f"user:{type(user)}")
+                token = get_tokens_for_user(user)
+                return Response(
+                    {"token": token, "message": "Login Successfully."},
+                    status=status.HTTP_200_OK,
+                )
+            else:
+                return Response(
+                    {
+                        "message": "Email or Password is not valid",
+                    },
+                    status=status.HTTP_404_NOT_FOUND,
+                )
         else:
             return Response(
                 {
-                    "message": "Email or Password is not valid",
-                },
-                status=status.HTTP_404_NOT_FOUND,
+                    "message": "You haven't verified your email. Click the link sent to your mail to verify and again try"
+                }
             )
 
         # email = request.data.get("email")

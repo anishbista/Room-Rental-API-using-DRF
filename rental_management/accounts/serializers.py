@@ -34,8 +34,17 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         data = self.initial_data
         mobile_no = data.get("mobile_no")
 
+        email = data.get("email")
+        registered_user = User.objects.filter(email=email).first()
+        if registered_user:
+            raise serializers.ValidationError(
+                {"message": "User with this email already exists"}
+            )
+
         if mobile_no and len(mobile_no) != 10:
-            raise serializers.ValidationError("Mobile no should be 10 digits:")
+            raise serializers.ValidationError(
+                {"message": "Mobile number should be 10 digits:"}
+            )
 
         return super().is_valid(raise_exception=raise_exception)
 
@@ -56,9 +65,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
                     "message": "Password must have minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character:"
                 }
             )
-
-        if len(mobile_no) != 10:
-            raise serializers.ValidationError("Mobile no should be 10 digits:")
 
         return data
 
