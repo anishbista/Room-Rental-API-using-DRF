@@ -24,15 +24,24 @@ from django.utils.http import urlsafe_base64_decode
 from django.http import HttpResponse
 
 
-def get_tokens_for_user(user):
+def get_tokens_for_user(request, user):
     refresh = RefreshToken.for_user(
         user,
+    )
+    current_site = get_current_site(request)
+    print(f"current_site: sadsadasd {current_site}")
+
+    profile_link = (
+        f"http://{current_site}/{user.profile_picture.url}"
+        if user.profile_picture
+        else None
     )
 
     token_payload = {
         "email": user.email,
         "name": user.name,
         "mobile_no": user.mobile_no,
+        "profile_pic": profile_link,
     }
     # access_token = str(refresh.access_token)
     refresh.payload.update(token_payload)
@@ -155,7 +164,7 @@ class UserLoginView(APIView):
             user = authenticate(email=email, password=password)
             if user:
                 print(f"user:{type(user)}")
-                token = get_tokens_for_user(user)
+                token = get_tokens_for_user(request, user)
                 return Response(
                     {"token": token, "message": "Login Successfully."},
                     status=status.HTTP_200_OK,
@@ -171,7 +180,8 @@ class UserLoginView(APIView):
             return Response(
                 {
                     "message": "You haven't verified your email. Click the link sent to your mail to verify and again try"
-                }
+                },
+                status=status.HTTP_401_UNAUTHORIZED,
             )
 
         # email = request.data.get("email")
@@ -224,6 +234,10 @@ class GenerateOTPView(APIView):
 
         if user:
             otp = str(random.randint(1000, 9999))
+            already_otp = OTP.objects.filter(user=user).first()
+            if already_otp:
+                OTP.objects.filter(user=user).delete()
+
             OTP.objects.create(user=user, otp=otp)
             Util.send_email(email, otp)
             return Response(
@@ -235,9 +249,9 @@ class GenerateOTPView(APIView):
                 {"message": "User not found"}, status=status.HTTP_404_NOT_FOUND
             )
 
-    def delete_expired_otps(self):
-        expired_time = timezone.now() + timedelta(minutes=1)
-        OTP.objects.filter(created_on__lt=expired_time).delete()
+    # def delete_expired_otps(self):
+    #     expired_time = timezone.now() + timedelta(minutes=1)
+    #     OTP.objects.filter(created_on__lt=expired_time).delete()
 
 
 class VerifyOTPView(APIView):

@@ -8,14 +8,15 @@ class AmenitiesSerializer(serializers.ModelSerializer):
         fields = ["ac", "free_wifi", "free_cable"]
 
 
-# class RoomImageSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = RoomImage
-#         fields = ["room", "image"]
+class RoomImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RoomImage
+        fields = ["room", "image"]
 
 
 class RoomSerializer(serializers.ModelSerializer):
     amenities = AmenitiesSerializer()
+    images = RoomImageSerializer(many=True)
 
     class Meta:
         model = Room
@@ -28,6 +29,7 @@ class RoomSerializer(serializers.ModelSerializer):
             "location",
             "is_available",
             "amenities",
+            "images",
         ]
 
 
@@ -69,5 +71,5 @@ class RoomAddSerializer(serializers.ModelSerializer):
             for image_data in images_data:
                 RoomImage.objects.create(room=room, image=image_data)
         else:
-            print("Image is not here q")
+            print("Image is not here ")
         return room
