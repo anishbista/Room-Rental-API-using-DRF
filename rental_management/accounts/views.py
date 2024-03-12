@@ -62,8 +62,12 @@ class UserRegistrationView(APIView):
             user.save()
             email = serializer.validated_data.get("email")
             verification_link = self.generate_verification_link(request, user)
-
-            Util.send_verification_email(email, verification_link)
+            email_data = {
+                "subject": "Activate your account",
+                "message": verification_link,
+                "receiver_email": email,
+            }
+            Util.send_email(email_data)
             return Response(
                 {
                     "message": "Link has been sent to your email. Click the link to verify."
@@ -239,7 +243,12 @@ class GenerateOTPView(APIView):
                 OTP.objects.filter(user=user).delete()
 
             OTP.objects.create(user=user, otp=otp)
-            Util.send_email(email, otp)
+            email_data = {
+                "subject": "Forgot Password OTP",
+                "message": f"Your OTP is {otp}",
+                "receiver_email": email,
+            }
+            Util.send_email(email_data)
             return Response(
                 {"message": "Otp sent. Please check your email", "email": f"{email}"},
                 status=status.HTTP_200_OK,

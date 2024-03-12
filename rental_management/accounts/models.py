@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 
 class UserManager(BaseUserManager):
     def create_user(
-        self, email, name, address, mobile_no=None, password=None, password2=None
+        self, email, name, address=None, mobile_no=None, password=None, password2=None
     ):
         if not email:
             raise ValueError("Users must have an email address")
@@ -46,8 +46,8 @@ class User(AbstractBaseUser):
         unique=True,
     )
     name = models.CharField(max_length=100)
-    mobile_no = models.CharField(max_length=10)
-    address = models.CharField(max_length=250)
+    mobile_no = models.CharField(max_length=10, null=True)
+    address = models.CharField(max_length=250, null=True)
     profile_picture = models.ImageField(upload_to="profile", blank=True, null=True)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)

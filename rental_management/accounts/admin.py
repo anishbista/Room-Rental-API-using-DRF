@@ -4,7 +4,14 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 
 class UserModelAdmin(BaseUserAdmin):
-    list_display = ["email", "name", "mobile_no", "is_admin", "profile_picture"]
+    list_display = [
+        "email",
+        "name",
+        "mobile_no",
+        "is_active",
+        "is_admin",
+        "profile_picture",
+    ]
     list_filter = ["is_admin"]
     fieldsets = [
         (None, {"fields": ["email", "password"]}),
@@ -12,7 +19,7 @@ class UserModelAdmin(BaseUserAdmin):
         (
             "Permissions",
             {
-                "fields": ["is_admin"],
+                "fields": ["is_admin", "is_active"],
             },
         ),
     ]
