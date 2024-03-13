@@ -53,8 +53,10 @@ class RoomAddSerializer(serializers.ModelSerializer):
         ]
 
     def validate_images(self, value):
-        if len(value) > 4:
-            raise serializers.ValidationError("You can only upload up to 4 images.")
+        if len(value) > 4 and len(value) < 2:
+            raise serializers.ValidationError(
+                "Minimum 2 and Maximum 4 images should be uploaded!"
+            )
         return value
 
     def create(self, validated_data):
@@ -69,6 +71,12 @@ class RoomAddSerializer(serializers.ModelSerializer):
         if images_data:
             print("Image s herer")
             for image_data in images_data:
+                if image_data.size > 1048576:
+                    raise serializers.ValidationError(
+                        {
+                            "message": "The maximum file size that can be uploaded is 1 MB"
+                        }
+                    )
                 RoomImage.objects.create(room=room, image=image_data)
         else:
             print("Image is not here ")

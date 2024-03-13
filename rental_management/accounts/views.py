@@ -62,10 +62,12 @@ class UserRegistrationView(APIView):
             user.save()
             email = serializer.validated_data.get("email")
             verification_link = self.generate_verification_link(request, user)
+            email_message = f"Please click <a href='{verification_link}'>this link</a> to activate your account."
             email_data = {
                 "subject": "Activate your account",
                 "message": verification_link,
                 "receiver_email": email,
+                "type": "registration",
             }
             Util.send_email(email_data)
             return Response(
@@ -164,7 +166,7 @@ class UserLoginView(APIView):
         password = serializer.data.get("password")
 
         registered_user = User.objects.filter(email=email).first()
-        if registered_user.is_active:
+        if registered_user and registered_user.is_active:
             user = authenticate(email=email, password=password)
             if user:
                 print(f"user:{type(user)}")
@@ -236,7 +238,7 @@ class GenerateOTPView(APIView):
         email = request.data.get("email")
         user = User.objects.filter(email=email).first()
 
-        if user:
+        if user.is_active:
             otp = str(random.randint(1000, 9999))
             already_otp = OTP.objects.filter(user=user).first()
             if already_otp:
@@ -245,8 +247,9 @@ class GenerateOTPView(APIView):
             OTP.objects.create(user=user, otp=otp)
             email_data = {
                 "subject": "Forgot Password OTP",
-                "message": f"Your OTP is {otp}",
+                "message": otp,
                 "receiver_email": email,
+                "type": "otp",
             }
             Util.send_email(email_data)
             return Response(

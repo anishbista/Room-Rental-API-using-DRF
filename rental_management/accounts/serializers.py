@@ -9,30 +9,29 @@ from django.core.validators import MinLengthValidator
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
 
-    # mobile_no = serializers.CharField(
-    #     max_length=10,
-    #     # validators=[
-    #     #     MinLengthValidator(
-    #     #         10, message="Mobile number should be exactly 10 digits."
-    #     #     ),
-    #     # ],
-    #     # error_messages={
-    #     #     "max_length": "Mobile number should be exactly 10 digits.",
-    #     # },
-    # )
-
     password2 = serializers.CharField(style={"input_type": "password"}, write_only=True)
 
     class Meta:
         model = User
-        fields = ["email", "name", "address", "password", "password2", "mobile_no"]
+        fields = [
+            "email",
+            "name",
+            "address",
+            # "profile_picture",
+            "password",
+            "password2",
+            "mobile_no",
+        ]
         extra_kwargs = {
             "password": {"write_only": True},
+            "address": {"required": True},
+            # "profile_picture": {"required": True},
         }
 
     def is_valid(self, *, raise_exception=False):
         data = self.initial_data
         mobile_no = data.get("mobile_no")
+        # profile_picture = data.get("profile_picture")
 
         email = data.get("email")
         registered_user = User.objects.filter(email=email).first()
@@ -45,6 +44,10 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {"message": "Mobile number should be 10 digits:"}
             )
+        # if profile_picture.size > 1048576:
+        #     raise serializers.ValidationError(
+        #         {"message": "The maximum file size that can be uploaded is 1 MB"}
+        #     )
 
         return super().is_valid(raise_exception=raise_exception)
 

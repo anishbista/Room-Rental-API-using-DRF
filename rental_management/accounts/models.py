@@ -2,11 +2,19 @@ from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from common.models import CommonInfo
 from django.core.exceptions import ValidationError
+from django.core.validators import FileExtensionValidator
 
 
 class UserManager(BaseUserManager):
     def create_user(
-        self, email, name, address=None, mobile_no=None, password=None, password2=None
+        self,
+        email,
+        name,
+        address=None,
+        mobile_no=None,
+        profile_picture=None,
+        password=None,
+        password2=None,
     ):
         if not email:
             raise ValueError("Users must have an email address")
@@ -16,6 +24,7 @@ class UserManager(BaseUserManager):
             name=name,
             mobile_no=mobile_no,
             address=address,
+            profile_picture=profile_picture,
         )
 
         user.set_password(password)
@@ -39,6 +48,13 @@ class UserManager(BaseUserManager):
         return user
 
 
+def validate_image_size(value):
+    filesize = value.size
+
+    if filesize > 1048576:
+        raise ValidationError("The maximum file size that can be uploaded is 1 MB")
+
+
 class User(AbstractBaseUser):
     email = models.EmailField(
         verbose_name="email",
@@ -48,7 +64,15 @@ class User(AbstractBaseUser):
     name = models.CharField(max_length=100)
     mobile_no = models.CharField(max_length=10, null=True)
     address = models.CharField(max_length=250, null=True)
-    profile_picture = models.ImageField(upload_to="profile", blank=True, null=True)
+    profile_picture = models.ImageField(
+        upload_to="profile",
+        blank=True,
+        null=True,
+        validators=[
+            FileExtensionValidator(allowed_extensions=["jpg", "jpeg", "png"]),
+            validate_image_size,
+        ],
+    )
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)

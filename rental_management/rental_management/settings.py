@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "accounts",
     "customadmin",
     "room",
+    "user_profile",
     # 3rd party
     "corsheaders",
     "rest_framework",
@@ -157,8 +158,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 TIME_ZONE = "Asia/Kathmandu"
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=10),
 }
 
 PASSWORD_RESET_TIMEOUT = 900  # This is used to set the time of token created while resting password through email

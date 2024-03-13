@@ -15,6 +15,7 @@ urlpatterns = (
             ),
         ),
         path("dj-admin/", admin.site.urls),
+        path("api/profile/", include("user_profile.urls")),
         path("api/user/", include("accounts.urls")),
         path("api/room/", include("room.urls")),
     ]
