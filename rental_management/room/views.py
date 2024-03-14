@@ -16,8 +16,16 @@ class RoomListView(ListAPIView):
 class RoomAddView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, format=None):
+    def get(self, request, format=None):
+        amenities_fields = (
+            Amenities._meta.fields
+        )  # _meta.fields provides fields available in model
 
+        fields_name = [field.name for field in amenities_fields][4:]
+
+        return Response({"amenities": fields_name}, status=status.HTTP_200_OK)
+
+    def post(self, request, format=None):
         print(request.user.email)
         serializer = RoomAddSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
