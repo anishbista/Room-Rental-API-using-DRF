@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from .models import Room, RoomImage
-from .pagination import CustomPagination
 
 
 # class AmenitiesSerializer(serializers.ModelSerializer):
@@ -18,7 +17,6 @@ class RoomImageSerializer(serializers.ModelSerializer):
 class RoomSerializer(serializers.ModelSerializer):
     # amenities = AmenitiesSerializer()
     images = RoomImageSerializer(many=True)
-    pagination_class = CustomPagination
 
     class Meta:
         model = Room
@@ -34,6 +32,22 @@ class RoomSerializer(serializers.ModelSerializer):
             # "amenities",
             "images",
         ]
+
+    # def to_representation(self, instance):
+    #     data = super().to_representation(instance)
+    #     # Customizing the response as needed
+    #     custom_data = {
+    #         "roomId": data["id"],
+    #         "user": data["user"],
+    #         "category": data["category"],
+    #         "title": data["title"],
+    #         "description": data["description"],
+    #         "price": float(data["price"]),  # Converting DecimalField to float
+    #         "location": data["location"],
+    #         "available": data["is_available"],
+    #         "images": [img["image"] for img in data["images"]],  # Extracting image URLs
+    #     }
+    #     return custom_data
 
 
 class RoomAddSerializer(serializers.ModelSerializer):
