@@ -166,27 +166,33 @@ class UserLoginView(APIView):
         password = serializer.data.get("password")
 
         registered_user = User.objects.filter(email=email).first()
-        if registered_user and registered_user.is_active:
-            user = authenticate(email=email, password=password)
-            if user:
-                print(f"user:{type(user)}")
-                token = get_tokens_for_user(request, user)
-                return Response(
-                    {"token": token, "message": "Login Successfully."},
-                    status=status.HTTP_200_OK,
-                )
+        if registered_user:
+            if registered_user.is_active:
+                user = authenticate(email=email, password=password)
+                if user:
+                    print(f"user:{type(user)}")
+                    token = get_tokens_for_user(request, user)
+                    return Response(
+                        {"token": token, "message": "Login Successfully."},
+                        status=status.HTTP_200_OK,
+                    )
+                else:
+                    return Response(
+                        {
+                            "message": "Email or Password is not valid",
+                        },
+                        status=status.HTTP_404_NOT_FOUND,
+                    )
             else:
                 return Response(
                     {
-                        "message": "Email or Password is not valid",
+                        "message": "You haven't verified your email. Click the link sent to your mail to verify and again try"
                     },
-                    status=status.HTTP_404_NOT_FOUND,
+                    status=status.HTTP_401_UNAUTHORIZED,
                 )
         else:
             return Response(
-                {
-                    "message": "You haven't verified your email. Click the link sent to your mail to verify and again try"
-                },
+                {"message": "Invalid Credentials!!"},
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 

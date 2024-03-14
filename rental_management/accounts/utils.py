@@ -70,6 +70,8 @@ class Util:
 
     def send_email(email_data):
 
+        # print(f"sdadadssdadsaasd: {email_data['message']}")
+
         email_html_message = render_to_string(
             "send_mail.html",
             {
@@ -79,6 +81,8 @@ class Util:
             },
         )
         plain_message = strip_tags(email_html_message)
+
+        print(f"plain message: {plain_message}")
         msg = EmailMultiAlternatives(
             email_data["subject"],
             plain_message,
@@ -87,7 +91,44 @@ class Util:
         )
 
         msg.attach_alternative(email_html_message, "text/html")
-        sent = msg.send(fail_silently=False)
+        sent = msg.send(fail_silently=True)
+        if sent:
+            print("Email sent successfully to", sent, "recipients.")
+        else:
+            print("Email sending failed.")
+
+    def send_enquiry(email_data):
+
+        # print(f"sdadadssdadsaasd: {email_data['message']}")
+
+        email_html_message = render_to_string(
+            "send_enquiry.html",
+            {
+                "subject": email_data["subject"],
+                "landlord_name": email_data["landlord_name"],
+                "room_title": email_data["room_title"],
+                "customer_name": email_data["customer_name"],
+                "customer_email": email_data["customer_email"],
+                "customer_mobile": email_data["customer_mobile"],
+                "message": email_data["message"],
+            },
+        )
+        plain_message = strip_tags(email_html_message)
+
+        print(f"plain message: {plain_message}")
+        msg = EmailMultiAlternatives(
+            email_data["subject"],
+            plain_message,
+            os.environ.get("EMAIL_FROM"),
+            [email_data["receiver_email"]],
+        )
+
+        msg.attach_alternative(email_html_message, "text/html")
+        sent = msg.send(fail_silently=True)
+        if sent:
+            print("Email sent successfully to", sent, "recipients.")
+        else:
+            print("Email sending failed.")
         # data = {
         #     "subject": email_data["subject"],
         #     "message": email_data["message"],

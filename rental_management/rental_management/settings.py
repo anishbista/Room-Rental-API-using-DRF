@@ -109,6 +109,8 @@ REST_FRAMEWORK = {
         "rest_framework.renderers.JSONRenderer",
     ],  # To view repsonse data in json format rather than rest_framework ui
     # "EXCEPTION_HANDLER": "drf_standardized_errors.handler.exception_handler",
+    # "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+    # "PAGE_SIZE": 2,
 }
 
 # Password validation

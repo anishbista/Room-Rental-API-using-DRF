@@ -8,6 +8,8 @@
 <body>
     {% if type == "otp" %}
     <p>Your OTP to reset password is <b>{{message}}</b></p>
+    {% elif type == "enquiry" %}
+    <p>{{message}}</p>
     {% else %}
     <p>Please click <a href="{{message}}">this link</a> to activate your account.</p>
     {% endif %}

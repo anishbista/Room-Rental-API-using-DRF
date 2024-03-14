@@ -1,11 +1,12 @@
 from rest_framework import serializers
-from .models import Room, Amenities, RoomImage
+from .models import Room, RoomImage
+from .pagination import CustomPagination
 
 
-class AmenitiesSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Amenities
-        fields = ["ac", "free_wifi", "free_cable"]
+# class AmenitiesSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Amenities
+#         fields = ["ac", "free_wifi", "free_cable"]
 
 
 class RoomImageSerializer(serializers.ModelSerializer):
@@ -15,12 +16,14 @@ class RoomImageSerializer(serializers.ModelSerializer):
 
 
 class RoomSerializer(serializers.ModelSerializer):
-    amenities = AmenitiesSerializer()
+    # amenities = AmenitiesSerializer()
     images = RoomImageSerializer(many=True)
+    pagination_class = CustomPagination
 
     class Meta:
         model = Room
         fields = [
+            "id",
             "user",
             "category",
             "title",
@@ -28,14 +31,14 @@ class RoomSerializer(serializers.ModelSerializer):
             "price",
             "location",
             "is_available",
-            "amenities",
+            # "amenities",
             "images",
         ]
 
 
 class RoomAddSerializer(serializers.ModelSerializer):
 
-    amenities = AmenitiesSerializer(required=True)
+    # amenities = AmenitiesSerializer(required=True)
     images = serializers.ListField(child=serializers.ImageField(), write_only=True)
 
     class Meta:
@@ -47,26 +50,26 @@ class RoomAddSerializer(serializers.ModelSerializer):
             "description",
             "price",
             "location",
-            "is_available",
-            "amenities",
+            # "amenities",
             "images",
         ]
 
     def validate_images(self, value):
-        if len(value) > 4 and len(value) < 2:
+        print(f"sdadsadasdassd {len(value)}")
+        if len(value) > 4 or len(value) < 2:
             raise serializers.ValidationError(
                 "Minimum 2 and Maximum 4 images should be uploaded!"
             )
         return value
 
     def create(self, validated_data):
-        amenities_data = validated_data.pop("amenities")
+        # amenities_data = validated_data.pop("amenities")
         images_data = validated_data.pop("images")
 
         room = Room.objects.create(**validated_data)
 
-        if amenities_data:
-            Amenities.objects.create(room=room, **amenities_data)
+        # if amenities_data:
+        #     Amenities.objects.create(room=room, **amenities_data)
 
         if images_data:
             print("Image s herer")
