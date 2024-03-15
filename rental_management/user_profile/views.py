@@ -7,6 +7,9 @@ from accounts.models import User
 from .serializers import *
 from .models import *
 from accounts.utils import Util
+from room.serializers import RoomSerializer
+
+# from rest_framework.decorators import extend_schema,extend_schema_view
 
 
 class UserProfileView(generics.RetrieveAPIView):
@@ -17,10 +20,29 @@ class UserProfileView(generics.RetrieveAPIView):
         return self.request.user
 
 
+# @extend_schema_view(
+#     post=extend_schema(
+#         tags=["Enquiry"
+#               ]
+#     )
+# )
+
+
+class UserRoomView(generics.RetrieveAPIView):
+    serializer_class = RoomSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        user = self.request.user
+        print(f"user: {user.id}")
+        return Room.objects.filter(user=user)
+
+
 class EnquiryView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, format=None):
+        request.data["customer_email"] = request.user.email
         serializer = EnquirySerializer(data=request.data)
 
         # print(f"dadadadadadadada: {request.data.get('room')}")

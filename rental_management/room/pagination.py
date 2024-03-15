@@ -1,13 +1,13 @@
-from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
 
-class CustomPagination(LimitOffsetPagination):
+class CustomPagination(PageNumberPagination):
 
-    default_limit = 15
+    page_size = 5
     # limit_query_param = "mylimit"
-    offset_query_param = "skip"
-    max_limit = 5
+    page_size_query_param = "page_size"
+    max_page_size = 5
 
     # def get_paginated_response(self, data):
     #     return Response(

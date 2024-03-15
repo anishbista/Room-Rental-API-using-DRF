@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     "drf_standardized_errors",
+    "drf_spectacular",
 ]
 
 AUTH_USER_MODEL = "accounts.User"
@@ -111,6 +112,16 @@ REST_FRAMEWORK = {
     # "EXCEPTION_HANDLER": "drf_standardized_errors.handler.exception_handler",
     # "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     # "PAGE_SIZE": 2,
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Blog API Project",
+    "DESCRIPTION": "A sample blog to learn about DRF",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    # OTHER SETTINGS
 }
 
 # Password validation
@@ -163,7 +174,7 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=10),
 }
 
-PASSWORD_RESET_TIMEOUT = 900  # This is used to set the time of token created while resting password through email
+# PASSWORD_RESET_TIMEOUT = 900  # This is used to set the time of token created while resting password through email
 
 CORS_ALLOWED_ORIGINS = ["http://127.0.0.1:5500", "http://127.0.0.1:8000"]
 

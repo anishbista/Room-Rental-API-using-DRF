@@ -1,11 +1,12 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, generics
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 from .serializers import *
 from rest_framework.permissions import IsAuthenticated
 from .pagination import CustomPagination
+import uuid
 
 
 class RoomListView(ListAPIView):
@@ -17,24 +18,8 @@ class RoomListView(ListAPIView):
 class RoomAddView(APIView):
     permission_classes = [IsAuthenticated]
 
-    # def get(self, request, format=None):
-    #     # amenities_fields = (
-    #     #     Amenities._meta.fields
-    #     # )  # _meta.fields provides fields available in model
-
-    #     # fields_name = [
-    #     #     f"'{field.name}':'amenities.{field.name}" for field in amenities_fields
-    #     # ][4:]
-
-    #     # amenities_data = [
-    #     #     {"name": "AC", "key": "amenities.ac"},
-    #     #     {"name": "Wifi", "key": "amenities.free_wifi"},
-    #     #     {"name": "Cable", "key": "amenities.Free_cable"},
-    #     # ]
-    #     return Response({"amenities": amenities_data}, status=status.HTTP_200_OK)
-
     def post(self, request, format=None):
-        print(request.user.email)
+        request.data["user"] = request.user.id
         serializer = RoomAddSerializer(data=request.data)
 
         if serializer.is_valid(raise_exception=True):
@@ -48,3 +33,27 @@ class RoomAddView(APIView):
                 status=status.HTTP_201_CREATED,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class RoomDetailView(APIView):
+    serializer_class = RoomDetailSerializer
+
+    def get_permissions(self):
+        if self.request.method in ["DELETE", "PUT"]:
+            return [IsAuthenticated()]
+        return []
+
+    def get_object(self, room_id):
+        return get_object_or_404(Room, id=room_id)
+
+    def get(self, request, room_id, format=None):
+        room = self.get_object(room_id)
+        serializer = RoomDetailSerializer(room)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def delete(self, request, room_id, format=None):
+        room = self.get_object(room_id)
+        room.delete()
+        return Response(
+            {"message": "Room deleted successfully!"}, status=status.HTTP_204_NO_CONTENT
+        )

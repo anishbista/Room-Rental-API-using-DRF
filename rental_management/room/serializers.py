@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Room, RoomImage, Amenities
+from accounts.models import User
 
 
 class AmenitiesSerializer(serializers.ModelSerializer):
@@ -16,7 +17,23 @@ class RoomImageSerializer(serializers.ModelSerializer):
         fields = ["room", "image"]
 
 
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["name"]
+
+    def to_representation(self, instance):
+        return instance.name
+
+
 class RoomSerializer(serializers.ModelSerializer):
+    user = serializers.CharField(source="user.name")
+    """ 
+    - The "user" field is customized using serializers.CharField(source='user.name').
+    - source='user.name' means that it should get the value for the "user" field from the "name" attribute of the related User model.
+    - serializers.CharField is used to directly represent the user's name as a string.
+    """
+
     amenities = AmenitiesSerializer(many=True)
     images = RoomImageSerializer(many=True)
 
@@ -36,21 +53,26 @@ class RoomSerializer(serializers.ModelSerializer):
             "images",
         ]
 
-    # def to_representation(self, instance):
-    #     data = super().to_representation(instance)
-    #     # Customizing the response as needed
-    #     custom_data = {
-    #         "roomId": data["id"],
-    #         "user": data["user"],
-    #         "category": data["category"],
-    #         "title": data["title"],
-    #         "description": data["description"],
-    #         "price": float(data["price"]),  # Converting DecimalField to float
-    #         "location": data["location"],
-    #         "available": data["is_available"],
-    #         "images": [img["image"] for img in data["images"]],  # Extracting image URLs
-    #     }
-    #     return custom_data
+
+class RoomDetailSerializer(serializers.ModelSerializer):
+    amenities = AmenitiesSerializer(many=True)
+    images = RoomImageSerializer(many=True)
+
+    class Meta:
+        model = Room
+        fields = [
+            "id",
+            "user",
+            "category",
+            "title",
+            "description",
+            "price",
+            "city",
+            "location",
+            "is_available",
+            "amenities",
+            "images",
+        ]
 
 
 class RoomAddSerializer(serializers.ModelSerializer):
