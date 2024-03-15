@@ -4,7 +4,7 @@ from rest_framework.response import Response
 
 class CustomPagination(LimitOffsetPagination):
 
-    default_limit = 5
+    default_limit = 15
     # limit_query_param = "mylimit"
     offset_query_param = "skip"
     max_limit = 5

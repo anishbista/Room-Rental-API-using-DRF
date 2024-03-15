@@ -244,24 +244,28 @@ class GenerateOTPView(APIView):
         email = request.data.get("email")
         user = User.objects.filter(email=email).first()
 
-        if user.is_active:
-            otp = str(random.randint(1000, 9999))
-            already_otp = OTP.objects.filter(user=user).first()
-            if already_otp:
-                OTP.objects.filter(user=user).delete()
+        if user:
+            if user.is_active:
+                otp = str(random.randint(1000, 9999))
+                already_otp = OTP.objects.filter(user=user).first()
+                if already_otp:
+                    OTP.objects.filter(user=user).delete()
 
-            OTP.objects.create(user=user, otp=otp)
-            email_data = {
-                "subject": "Forgot Password OTP",
-                "message": otp,
-                "receiver_email": email,
-                "type": "otp",
-            }
-            Util.send_email(email_data)
-            return Response(
-                {"message": "Otp sent. Please check your email", "email": f"{email}"},
-                status=status.HTTP_200_OK,
-            )
+                OTP.objects.create(user=user, otp=otp)
+                email_data = {
+                    "subject": "Forgot Password OTP",
+                    "message": otp,
+                    "receiver_email": email,
+                    "type": "otp",
+                }
+                Util.send_email(email_data)
+                return Response(
+                    {
+                        "message": "Otp sent. Please check your email",
+                        "email": f"{email}",
+                    },
+                    status=status.HTTP_200_OK,
+                )
         else:
             return Response(
                 {"message": "User not found"}, status=status.HTTP_404_NOT_FOUND

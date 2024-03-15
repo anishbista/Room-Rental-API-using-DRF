@@ -1,11 +1,13 @@
 from rest_framework import serializers
-from .models import Room, RoomImage
+from .models import Room, RoomImage, Amenities
 
 
-# class AmenitiesSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Amenities
-#         fields = ["ac", "free_wifi", "free_cable"]
+class AmenitiesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Amenities
+        fields = [
+            "item",
+        ]
 
 
 class RoomImageSerializer(serializers.ModelSerializer):
@@ -15,7 +17,7 @@ class RoomImageSerializer(serializers.ModelSerializer):
 
 
 class RoomSerializer(serializers.ModelSerializer):
-    # amenities = AmenitiesSerializer()
+    amenities = AmenitiesSerializer(many=True)
     images = RoomImageSerializer(many=True)
 
     class Meta:
@@ -27,9 +29,10 @@ class RoomSerializer(serializers.ModelSerializer):
             "title",
             "description",
             "price",
+            "city",
             "location",
             "is_available",
-            # "amenities",
+            "amenities",
             "images",
         ]
 
@@ -52,7 +55,7 @@ class RoomSerializer(serializers.ModelSerializer):
 
 class RoomAddSerializer(serializers.ModelSerializer):
 
-    # amenities = AmenitiesSerializer(required=True)
+    amenities = serializers.ListField(child=serializers.CharField(), required=False)
     images = serializers.ListField(child=serializers.ImageField(), write_only=True)
 
     class Meta:
@@ -64,7 +67,8 @@ class RoomAddSerializer(serializers.ModelSerializer):
             "description",
             "price",
             "location",
-            # "amenities",
+            "city",
+            "amenities",
             "images",
         ]
 
@@ -77,13 +81,16 @@ class RoomAddSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
-        # amenities_data = validated_data.pop("amenities")
+        amenities_data = validated_data.pop("amenities", [])
         images_data = validated_data.pop("images")
 
         room = Room.objects.create(**validated_data)
 
         # if amenities_data:
         #     Amenities.objects.create(room=room, **amenities_data)
+        if amenities_data:
+            for item in amenities_data:
+                Amenities.objects.create(room=room, item=item)
 
         if images_data:
             print("Image s herer")
