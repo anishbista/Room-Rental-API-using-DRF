@@ -15,6 +15,9 @@ class Room(CommonInfo):
     is_expired = models.BooleanField(default=False)
     is_available = models.BooleanField(default=True)
 
+    class Meta:
+        ordering = ["created_on"]
+
     def __str__(self):
         return str(self.id)
 

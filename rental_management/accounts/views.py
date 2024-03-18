@@ -166,14 +166,34 @@ class UserLoginView(APIView):
         password = serializer.data.get("password")
 
         registered_user = User.objects.filter(email=email).first()
+
+        print(f"Check:  {request.is_secure()}")
         if registered_user:
             if registered_user.is_active:
                 user = authenticate(email=email, password=password)
                 if user:
                     print(f"user:{type(user)}")
                     token = get_tokens_for_user(request, user)
+                    current_site = get_current_site(request)
+                    if request.is_secure():
+                        profile_link = (
+                            f"http://{current_site}/{user.profile_picture.url}"
+                            if user.profile_picture
+                            else None
+                        )
+                    else:
+                        profile_link = (
+                            f"https://{current_site}/{user.profile_picture.url}"
+                            if user.profile_picture
+                            else None
+                        )
                     return Response(
-                        {"token": token, "message": "Login Successfully."},
+                        {
+                            "username": user.name,
+                            "profile_picture": profile_link,
+                            "token": token,
+                            "message": "Login Successfully.",
+                        },
                         status=status.HTTP_200_OK,
                     )
                 else:
@@ -345,3 +365,17 @@ class ResetPasswordView(APIView):
 #                     status=status.HTTP_400_BAD_REQUEST,
 #                 )
 #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ChangePasswordView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, format=None):
+        serializer = ChangePasswordSerializer(
+            data=request.data, context={"user": request.user}
+        )
+        if serializer.is_valid():
+            return Response(
+                {"message": "Password Changed Successfully"}, status=status.HTTP_200_OK
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -68,7 +68,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "common.custom_middleware.CustomErrorMiddleware",
+    # "common.custom_middleware.CustomErrorMiddleware",
 ]
 
 ROOT_URLCONF = "rental_management.urls"
@@ -172,7 +172,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 TIME_ZONE = "Asia/Kathmandu"
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=10),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
 }
 
 # PASSWORD_RESET_TIMEOUT = 900  # This is used to set the time of token created while resting password through email
@@ -186,3 +186,6 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = os.environ.get("EMAIL_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_PASS")
 EMAIL_USE_TLS = True
+
+
+# APPEND_SLASH = False

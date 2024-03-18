@@ -36,10 +36,12 @@ class RoomSerializer(serializers.ModelSerializer):
 
     amenities = AmenitiesSerializer(many=True)
     images = RoomImageSerializer(many=True)
+    created_on = serializers.DateTimeField(format="%Y-%m-%d")
 
     class Meta:
         model = Room
         fields = [
+            "created_on",
             "id",
             "user",
             "category",
@@ -126,4 +128,31 @@ class RoomAddSerializer(serializers.ModelSerializer):
                 RoomImage.objects.create(room=room, image=image_data)
         else:
             print("Image is not here ")
+        return room
+
+    def update(self, room, validated_data):
+        room.title = validated_data.get("title", room.title)
+        room.description = validated_data.get("description", room.description)
+        room.price = validated_data.get("price", room.price)
+        room.location = validated_data.get("location", room.location)
+        room.city = validated_data.get("city", room.city)
+
+        amenities_data = validated_data.get("amenities", [])
+        images_data = validated_data.get("images")
+
+        if amenities_data:
+            for item in amenities_data:
+                Amenities.object.create(room=room, item=item)
+
+        if images_data:
+            for item in images_data:
+                if item.size > 1048576:
+                    raise serializers.ValidationError(
+                        {
+                            "message": "The maximum file size that can be uploaded is 1 MB"
+                        }
+                    )
+                RoomImage.objects.create(room=room, image=item)
+
+        room.save()
         return room

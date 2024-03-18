@@ -7,6 +7,24 @@ from .models import User
 from django.core.validators import MinLengthValidator
 
 
+def password_validation(password, password2):
+    if password != password2:
+        raise serializers.ValidationError(
+            {"message": "Password and Confirm Password doesn't match"}
+        )
+
+    if not re.match(
+        "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$",
+        password,
+    ):
+        raise serializers.ValidationError(
+            {
+                "message": "Password must have minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character:"
+            }
+        )
+    return password
+
+
 class UserRegistrationSerializer(serializers.ModelSerializer):
 
     password2 = serializers.CharField(style={"input_type": "password"}, write_only=True)
@@ -139,6 +157,29 @@ class ResetPasswordSerializer(serializers.Serializer):
         user = User.objects.get(email=email)
         user.set_password(password)
         user.save()
+        return data
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(max_length=255)
+    password = serializers.CharField(max_length=255)
+    password2 = serializers.CharField(max_length=255)
+
+    def validate(self, data):
+        user = self.context["user"]
+        print(f"User:           {user}")
+        old_password = data.get("old_password")
+        print(f"old_password:           {old_password}")
+        password = data.get("password")
+        print(f"password:           {password}")
+        password2 = data.get("password2")
+        print(f"password2:           {user.check_password(old_password)}")
+        if not user.check_password(old_password):
+            raise serializers.ValidationError({"message": "Old password is incorrect."})
+        valid_password = password_validation(password, password2)
+        if valid_password:
+            user.set_password(valid_password)
+            user.save()
         return data
 
 

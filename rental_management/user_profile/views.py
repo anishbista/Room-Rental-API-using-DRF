@@ -8,6 +8,8 @@ from .serializers import *
 from .models import *
 from accounts.utils import Util
 from room.serializers import RoomSerializer
+from common.pagination import CustomPagination
+
 
 # from rest_framework.decorators import extend_schema,extend_schema_view
 
@@ -20,29 +22,42 @@ class UserProfileView(generics.RetrieveAPIView):
         return self.request.user
 
 
-# @extend_schema_view(
-#     post=extend_schema(
-#         tags=["Enquiry"
-#               ]
-#     )
-# )
-
-
-class UserRoomView(generics.RetrieveAPIView):
-    serializer_class = RoomSerializer
+class UserUpdateView(generics.UpdateAPIView):
+    serializer_class = UserUpdateSerializer
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
-        user = self.request.user
-        print(f"user: {user.id}")
-        return Room.objects.filter(user=user)
+        return self.request.user
+
+
+class UserRoomView(generics.ListAPIView):
+    serializer_class = RoomSerializer
+    permission_classes = [IsAuthenticated]
+    pagination_class = CustomPagination
+
+    def get_queryset(self):
+        return Room.objects.filter(user=self.request.user)
+
+
+class UserEnquiryView(generics.ListAPIView):
+    serializer_class = EnquirySerializer
+    permission_classes = [IsAuthenticated]
+    pagination_class = CustomPagination
+
+    def get_queryset(self):
+        return Enquiry.objects.filter(customer_email=self.request.user.email)
 
 
 class EnquiryView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, format=None):
+        print(f"Request tpe: {request.data._mutable}")
+        request.data._mutable = True
+        print(f"Before:   {request.data}")
         request.data["customer_email"] = request.user.email
+        request.data._mutable = False
+        print(f"After:   {request.data}")
         serializer = EnquirySerializer(data=request.data)
 
         # print(f"dadadadadadadada: {request.data.get('room')}")
