@@ -8,6 +8,8 @@ from rest_framework.permissions import IsAuthenticated
 from common.pagination import CustomPagination
 from .permissions import IsRoomOwner
 import uuid
+from django.utils import timezone
+from datetime import timedelta
 
 
 def get_object(room_id):
@@ -108,3 +110,14 @@ class RoomUpdateView(APIView):
         #     {"message": "You are not authorized to update"},
         #     status=status.HTTP_401_UNAUTHORIZED,
         # )
+
+
+class RecentlyAdded(ListAPIView):
+    pagination_class = CustomPagination
+    before_two_days = timezone.now() - timedelta(days=2)
+    print(f"before:    {before_two_days}")
+    queryset = Room.objects.filter(created_on__gte=before_two_days)
+
+    for i in queryset:
+        print(i.created_on)
+    serializer_class = RoomSerializer
