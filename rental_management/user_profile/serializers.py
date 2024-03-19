@@ -37,8 +37,21 @@ class EnquirySerializer(serializers.ModelSerializer):
             "message",
         ]
 
-        def create(self, validated_data):
-            Enquiry.objects.create(**validated_data)
+    def validate(self, data):
+        room_id = self.context["id"]
+        user = self.context["user"]
+
+        room_user = Room.objects.filter(id=room_id).first()
+        print(f"room  {room_user.user.email}        user: {user.email}")
+
+        if room_user.user.email == user.email:
+            raise serializers.ValidationError(
+                {"message": "Enquiring own room not allowed!"}
+            )
+        return data
+
+    def create(self, validated_data):
+        return Enquiry.objects.create(**validated_data)
 
 
 # class UserEnquirySerializer(serializers.ModelSerializer):

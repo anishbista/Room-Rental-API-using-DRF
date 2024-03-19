@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "drf_standardized_errors",
     "drf_spectacular",
+    "django_cleanup.apps.CleanupConfig",
 ]
 
 AUTH_USER_MODEL = "accounts.User"
@@ -121,7 +122,7 @@ SPECTACULAR_SETTINGS = {
     "TITLE": "Blog API Project",
     "DESCRIPTION": "A sample blog to learn about DRF",
     "VERSION": "1.0.0",
-    "SERVE_INCLUDE_SCHEMA": False,
+    "SERVE_INCLUDE_SCHEMA": True,
     # OTHER SETTINGS
 }
 

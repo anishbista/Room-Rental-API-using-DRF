@@ -26,6 +26,9 @@ class RoomAddView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, format=None):
+        print(f"Request data:  {request.data}")
+        # for x, y in request.data.items():
+        #     print(f"{x}    {y}")
         request.data["user"] = request.user.id
         serializer = RoomAddSerializer(data=request.data)
 

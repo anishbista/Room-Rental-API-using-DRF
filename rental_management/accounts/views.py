@@ -2,26 +2,20 @@ import random
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
-
 from .serializers import *
-from datetime import timedelta
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
-from .renders import UserRenderer
 from .models import User, OTP
 from .utils import Util
-from django.utils import timezone
-from django.shortcuts import get_object_or_404
-
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.shortcuts import get_current_site
-from django.template.loader import render_to_string
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from django.http import HttpResponse
+from drf_spectacular.utils import extend_schema, extend_schema_view
 
 
 def get_tokens_for_user(request, user):
@@ -51,6 +45,13 @@ def get_tokens_for_user(request, user):
     }
 
 
+@extend_schema_view(
+    post=extend_schema(
+        tags=["Registration"],
+        description="Account registration API -description",
+        summary="Account registration API -summary",
+    )
+)
 class UserRegistrationView(APIView):
     def post(self, request, format=None):
         serializer = UserRegistrationSerializer(data=request.data)
@@ -189,7 +190,10 @@ class UserLoginView(APIView):
                         )
                     return Response(
                         {
-                            "username": user.name,
+                            "name": user.name,
+                            "mobile_no": user.mobile_no,
+                            "address": user.address,
+                            "email": user.email,
                             "profile_picture": profile_link,
                             "token": token,
                             "message": "Login Successfully.",
