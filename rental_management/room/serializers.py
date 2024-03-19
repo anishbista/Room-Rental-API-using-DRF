@@ -57,12 +57,15 @@ class RoomSerializer(serializers.ModelSerializer):
 
 
 class RoomDetailSerializer(serializers.ModelSerializer):
+    user = serializers.CharField(source="user.name")
     amenities = AmenitiesSerializer(many=True)
     images = RoomImageSerializer(many=True)
+    created_on = serializers.DateTimeField(format="%Y-%m-%d")
 
     class Meta:
         model = Room
         fields = [
+            "created_on",
             "id",
             "user",
             "category",

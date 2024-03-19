@@ -54,7 +54,7 @@ class RoomDetailView(APIView):
     #     return []
 
     def get(self, request, room_id, format=None):
-        room = self.get_object(room_id)
+        room = get_object(room_id)
         serializer = RoomDetailSerializer(room)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

@@ -178,13 +178,13 @@ class UserLoginView(APIView):
                     current_site = get_current_site(request)
                     if request.is_secure():
                         profile_link = (
-                            f"http://{current_site}/{user.profile_picture.url}"
+                            f"https://{current_site}/{user.profile_picture.url}"
                             if user.profile_picture
                             else None
                         )
                     else:
                         profile_link = (
-                            f"https://{current_site}/{user.profile_picture.url}"
+                            f"http://{current_site}/{user.profile_picture.url}"
                             if user.profile_picture
                             else None
                         )
