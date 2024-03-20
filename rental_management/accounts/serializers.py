@@ -43,36 +43,34 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             "password": {"write_only": True},
             "address": {"required": True},
+            "mobile_no": {"required": True},
             # "profile_picture": {"required": True},
         }
 
     def is_valid(self, *, raise_exception=False):
         data = self.initial_data
         mobile_no = data.get("mobile_no")
+        password = data.get("password")
+        password2 = data.get("password2")
         # profile_picture = data.get("profile_picture")
 
         email = data.get("email")
         registered_user = User.objects.filter(email=email).first()
         if registered_user:
             raise serializers.ValidationError(
-                {"message": "User with this email already exists"}
+                {
+                    "message": "User with this email already exists but haven't verified your email."
+                }
             )
 
         if mobile_no and len(mobile_no) != 10:
             raise serializers.ValidationError(
-                {"message": "Mobile number should be 10 digits:"}
+                {"message": "Mobile number should be 10 digits"}
             )
         # if profile_picture.size > 1048576:
         #     raise serializers.ValidationError(
         #         {"message": "The maximum file size that can be uploaded is 1 MB"}
         #     )
-
-        return super().is_valid(raise_exception=raise_exception)
-
-    def validate(self, data):
-        password = data.get("password")
-        password2 = data.get("password2")
-        mobile_no = data.get("mobile_no")
         if password != password2:
             raise serializers.ValidationError(
                 {"message": "Password and Confirm Password doesn't match."}
@@ -86,8 +84,27 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
                     "message": "Password must have minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character:"
                 }
             )
+        return super().is_valid(raise_exception=raise_exception)
 
-        return data
+    # def validate(self, data):
+    #     password = data.get("password")
+    #     password2 = data.get("password2")
+
+    #     if password != password2:
+    #         raise serializers.ValidationError(
+    #             {"message": "Password and Confirm Password doesn't match."}
+    #         )
+    #     if not re.match(
+    #         "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$",
+    #         password,
+    #     ):
+    #         raise serializers.ValidationError(
+    #             {
+    #                 "message": "Password must have minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character:"
+    #             }
+    #         )
+
+    #     return data
 
     def create(self, validate_data):
 

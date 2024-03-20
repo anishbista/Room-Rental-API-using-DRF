@@ -203,10 +203,8 @@ class UserLoginView(APIView):
                     )
                 else:
                     return Response(
-                        {
-                            "message": "Email or Password is not valid",
-                        },
-                        status=status.HTTP_404_NOT_FOUND,
+                        {"message": "Invalid Credentials!!"},
+                        status=status.HTTP_401_UNAUTHORIZED,
                     )
             else:
                 return Response(
@@ -291,6 +289,13 @@ class GenerateOTPView(APIView):
                     },
                     status=status.HTTP_200_OK,
                 )
+            else:
+                return Response(
+                    {
+                        "message": "You haven't verified your email. Click the link sent to your mail to verify and again try"
+                    },
+                    status=status.HTTP_401_UNAUTHORIZED,
+                )
         else:
             return Response(
                 {"message": "User not found"}, status=status.HTTP_404_NOT_FOUND
@@ -324,11 +329,20 @@ class ResetPasswordView(APIView):
     # renderer_classes = [UserRenderer]
 
     def post(self, request, format=None):
-        serializer = ResetPasswordSerializer(data=request.data)
-        if serializer.is_valid():
+        email = request.data.get("email")
+        user = User.objects.filter(email=email).first()
+        if user and user.is_active:
+            serializer = ResetPasswordSerializer(data=request.data)
+            if serializer.is_valid():
 
+                return Response(
+                    {"message": "Password Changed successfully"},
+                    status=status.HTTP_200_OK,
+                )
+        else:
             return Response(
-                {"message": "Password Changed successfully"}, status=status.HTTP_200_OK
+                {"message": "You haven't been registered!!"},
+                status=status.HTTP_403_FORBIDDEN,
             )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

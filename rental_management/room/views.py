@@ -29,17 +29,49 @@ class RoomFilter(FilterSet):
 
 class RoomListView(ListAPIView):
     pagination_class = CustomPagination
-    queryset = Room.objects.all()
+    # queryset = Room.objects.all()
     serializer_class = RoomSerializer
     filter_backends = [SearchFilter, DjangoFilterBackend]
     search_fields = ["^title"]
     # filterset_fields = ["city", "category"]
     filterset_class = RoomFilter
+    ordering = ["-created_on"]
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context["request"] = self.request
         return context
+
+    def get_queryset(self):
+        return Room.objects.all().order_by("-created_on")
+
+
+""" Customized filter query
+ """
+# class RoomListView(APIView):
+#     pagination_class = CustomPagination
+
+#     def get(self, request):
+#         queryset = Room.objects.all()
+#         title = request.query_params.get("search")
+#         price_max = request.query_params.get("price_max")
+#         price_min = request.query_params.get("price_min")
+#         if title is not None:
+#             print(f"title: {title}")
+#             queryset = Room.objects.filter(title__icontains=title)
+#             print(queryset)
+
+#         if price_min is not None:
+#             queryset = Room.objects.filter(price__gte=price_min)
+#         if price_max is not None:
+#             queryset = Room.objects.filter(price__lte=price_max)
+
+#         paginator = self.pagination_class()
+#         result_page = paginator.paginate_queryset(queryset, request)
+#         serializer = RoomSerializer(
+#             result_page, many=True, context={"request": request}
+#         )
+#         return paginator.get_paginated_response(serializer.data)
 
 
 class RoomAddView(APIView):
@@ -65,17 +97,15 @@ class RoomAddView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+from rest_framework.exceptions import MethodNotAllowed
+
+
 class RoomDetailView(APIView):
     serializer_class = RoomDetailSerializer
 
-    # def get_permissions(self):
-    #     if self.request.method in ["DELETE", "PUT"]:
-    #         return [IsAuthenticated()]
-    #     return []
-
     def get(self, request, room_id, format=None):
         room = get_object(room_id)
-        serializer = RoomDetailSerializer(room)
+        serializer = RoomDetailSerializer(room, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 

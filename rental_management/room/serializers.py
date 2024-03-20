@@ -99,6 +99,7 @@ class RoomDetailSerializer(serializers.ModelSerializer):
 
     def get_images(self, obj):
         request = self.context.get("request")
+
         return [
             request.build_absolute_uri(image.image.url) for image in obj.images.all()
         ]

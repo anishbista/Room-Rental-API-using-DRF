@@ -29,6 +29,37 @@ class UserUpdateView(generics.UpdateAPIView):
     def get_object(self):
         return self.request.user
 
+    def update(self, request, *args, **kwargs):
+        serializer = self.get_serializer(
+            instance=self.get_object(), data=request.data, partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        print(f"dsadadad: {serializer.validated_data}")
+        profile_link = (
+            request.build_absolute_uri(request.user.profile_picture.url)
+            if request.user.profile_picture
+            else None
+        )
+        return Response(
+            {
+                "message": "Profile updated successfully",
+                "name": request.user.name,
+                "mobile_no": request.user.mobile_no,
+                "address": request.user.address,
+                "email": request.user.email,
+                "profile_picture": profile_link,
+            }
+        )
+
+
+# class UserUpdateView(generics.UpdateAPIView):
+#     serializer_class = UserUpdateSerializer
+#     permission_classes = [IsAuthenticated]
+
+#     def get_object(self):
+#         return self.request.user
+
 
 class UserRoomView(generics.ListAPIView):
     serializer_class = RoomSerializer

@@ -21,6 +21,15 @@ class UserUpdateSerializer(serializers.ModelSerializer):
             "profile_picture": {"required": False},
         }
 
+    def is_valid(self, *, raise_exception=False):
+        data = self.initial_data
+        mobile_no = data.get("mobile_no")
+        if mobile_no and len(mobile_no) != 10:
+            raise serializers.ValidationError(
+                {"message": "Mobile number should be 10 digits"}
+            )
+        return super().is_valid(raise_exception=raise_exception)
+
 
 class EnquirySerializer(serializers.ModelSerializer):
     customer_email = serializers.EmailField(write_only=True)
