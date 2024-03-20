@@ -184,7 +184,8 @@ class UserLoginView(APIView):
                         )
                     else:
                         profile_link = (
-                            f"http://{current_site}/{user.profile_picture.url}"
+                            # f"http://{current_site}/{user.profile_picture.url}"
+                            request.build_absolute_uri(user.profile_picture.url)
                             if user.profile_picture
                             else None
                         )

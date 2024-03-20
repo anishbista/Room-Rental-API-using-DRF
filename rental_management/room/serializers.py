@@ -34,8 +34,10 @@ class RoomSerializer(serializers.ModelSerializer):
     - serializers.CharField is used to directly represent the user's name as a string.
     """
 
-    amenities = AmenitiesSerializer(many=True)
-    images = RoomImageSerializer(many=True)
+    # amenities = AmenitiesSerializer(many=True)
+    # images = RoomImageSerializer(many=True)
+    amenities = serializers.SerializerMethodField()
+    images = serializers.SerializerMethodField()
     created_on = serializers.DateTimeField(format="%Y-%m-%d")
 
     class Meta:
@@ -55,11 +57,24 @@ class RoomSerializer(serializers.ModelSerializer):
             "images",
         ]
 
+    def get_amenities(self, obj):
+        return [amenity.item for amenity in obj.amenities.all()]
+
+    def get_images(self, obj):
+        request = self.context.get("request")
+        return [
+            request.build_absolute_uri(image.image.url) for image in obj.images.all()
+        ]
+
+    # request.build_absolute_uri => Returns the absolute URI form of location. If the location is already an absolute URI, it will not be altered. Otherwise the absolute URI is built using the server variables available in this request.
+
 
 class RoomDetailSerializer(serializers.ModelSerializer):
     user = serializers.CharField(source="user.name")
-    amenities = AmenitiesSerializer(many=True)
-    images = RoomImageSerializer(many=True)
+    # amenities = AmenitiesSerializer(many=True)
+    # images = RoomImageSerializer(many=True)
+    amenities = serializers.SerializerMethodField()
+    images = serializers.SerializerMethodField()
     created_on = serializers.DateTimeField(format="%Y-%m-%d")
 
     class Meta:
@@ -77,6 +92,15 @@ class RoomDetailSerializer(serializers.ModelSerializer):
             "is_available",
             "amenities",
             "images",
+        ]
+
+    def get_amenities(self, obj):
+        return [amenity.item for amenity in obj.amenities.all()]
+
+    def get_images(self, obj):
+        request = self.context.get("request")
+        return [
+            request.build_absolute_uri(image.image.url) for image in obj.images.all()
         ]
 
 
@@ -99,22 +123,29 @@ class RoomAddSerializer(serializers.ModelSerializer):
             "images",
         ]
 
-    def validate_images(self, value):
+    def validate_image(self, value):
         print(f"sdadsadasdassd {len(value)}")
         if len(value) > 4 or len(value) < 2:
             raise serializers.ValidationError(
-                "Minimum 2 and Maximum 4 images should be uploaded!"
+                {"message": "Minimum 2 and Maximum 4 images should be uploaded!"}
             )
+        for image_data in value:
+            if image_data.size > 1048576:
+                raise serializers.ValidationError(
+                    {"message": "The maximum file size that can be uploaded is 1 MB"}
+                )
+
         return value
 
     def create(self, validated_data):
         amenities_data = validated_data.pop("amenities", [])
         images_data = validated_data.pop("images")
 
-        room = Room.objects.create(**validated_data)
-
         # if amenities_data:
         #     Amenities.objects.create(room=room, **amenities_data)
+        result = self.validate_image(images_data)
+        if result:
+            room = Room.objects.create(**validated_data)
         if amenities_data:
             for item in amenities_data:
                 Amenities.objects.create(room=room, item=item)
@@ -122,12 +153,6 @@ class RoomAddSerializer(serializers.ModelSerializer):
         if images_data:
             print("Image s herer")
             for image_data in images_data:
-                if image_data.size > 1048576:
-                    raise serializers.ValidationError(
-                        {
-                            "message": "The maximum file size that can be uploaded is 1 MB"
-                        }
-                    )
                 RoomImage.objects.create(room=room, image=image_data)
         else:
             print("Image is not here ")

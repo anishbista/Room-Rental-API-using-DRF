@@ -10,16 +10,36 @@ from .permissions import IsRoomOwner
 import uuid
 from django.utils import timezone
 from datetime import timedelta
+from rest_framework.filters import SearchFilter
+from django_filters.rest_framework import DjangoFilterBackend, filters
+from django_filters import FilterSet, RangeFilter
 
 
 def get_object(room_id):
     return get_object_or_404(Room, id=room_id)
 
 
+class RoomFilter(FilterSet):
+    price = RangeFilter()
+
+    class Meta:
+        model = Room
+        fields = ["price", "category", "city", "is_available"]
+
+
 class RoomListView(ListAPIView):
     pagination_class = CustomPagination
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
+    filter_backends = [SearchFilter, DjangoFilterBackend]
+    search_fields = ["^title"]
+    # filterset_fields = ["city", "category"]
+    filterset_class = RoomFilter
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["request"] = self.request
+        return context
 
 
 class RoomAddView(APIView):

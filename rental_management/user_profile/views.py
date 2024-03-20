@@ -52,11 +52,11 @@ class EnquiryView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, format=None):
-        print(f"Request tpe: {request.data._mutable}")
-        request.data._mutable = True
-        print(f"Before:   {request.data}")
+        # print(f"Request tpe: {request.data._mutable}")
+        # request.data._mutable = True
+        # print(f"Before:   {request.data}")
         request.data["customer_email"] = request.user.email
-        request.data._mutable = False
+        # request.data._mutable = False
         print(f"After:   {request.data}")
         serializer = EnquirySerializer(
             data=request.data,

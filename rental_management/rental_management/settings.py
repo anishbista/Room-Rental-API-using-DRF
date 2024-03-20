@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "drf_standardized_errors",
     "drf_spectacular",
+    "django_filters",
     "django_cleanup.apps.CleanupConfig",
 ]
 
@@ -115,6 +116,7 @@ REST_FRAMEWORK = {
     # "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     # "PAGE_SIZE": 2,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "SEARCH_PARAM": "search",
 }
 
 

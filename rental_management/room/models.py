@@ -6,7 +6,8 @@ from django.core.exceptions import ValidationError
 
 class Room(CommonInfo):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    category = models.CharField(choices=room_category, max_length=20)
+    category = models.CharField(max_length=250)
+    # category = models.CharField(choices=room_category, max_length=20)
     title = models.CharField(max_length=250)
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
