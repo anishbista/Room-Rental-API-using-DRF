@@ -4,7 +4,11 @@ from rest_framework.views import APIView
 from rest_framework.views import Response
 from rest_framework import generics
 from accounts.models import User
-from .serializers import *
+from .serializers import (
+    UserProfileSerializer,
+    UserUpdateSerializer,
+    EnquirySerializer,
+)
 from .models import *
 from accounts.utils import Util
 from room.serializers import RoomSerializer
