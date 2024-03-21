@@ -46,6 +46,15 @@ class EnquirySerializer(serializers.ModelSerializer):
             "message",
         ]
 
+    def is_valid(self, *, raise_exception=False):
+        data = self.initial_data
+        mobile_no = data.get("mobile_no")
+        if mobile_no and len(mobile_no) != 10:
+            raise serializers.ValidationError(
+                {"message": "Mobile number should be 10 digits"}
+            )
+        return super().is_valid(raise_exception=raise_exception)
+
     def validate(self, data):
         room_id = self.context["id"]
         user = self.context["user"]

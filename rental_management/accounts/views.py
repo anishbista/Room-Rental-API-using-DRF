@@ -99,6 +99,7 @@ class UserRegistrationView(APIView):
 
     def generate_verification_link(self, request, user):
         current_site = get_current_site(request)
+
         print(
             f"current_site - {current_site}             current_site_domain - {current_site.domain}"
         )
@@ -300,11 +301,11 @@ class GenerateOTPView(APIView):
                     "type": "otp",
                 }
 
-                # email_thread = threading.Thread(
-                #     target=send_email_in_thread, args=(email_data,)
-                # )
-                # email_thread.start()
-                Util.send_email(email_data)
+                email_thread = threading.Thread(
+                    target=send_email_in_thread, args=(email_data,), daemon=True
+                )
+                email_thread.start()
+                # Util.send_email(email_data)
                 return Response(
                     {
                         "message": "Otp sent. Please check your email",

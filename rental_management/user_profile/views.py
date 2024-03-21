@@ -95,11 +95,13 @@ class EnquiryView(APIView):
         # print(f"Request tpe: {request.data._mutable}")
         # request.data._mutable = True
         # print(f"Before:   {request.data}")
-        request.data["customer_email"] = request.user.email
+        mutable_data = request.data.copy()
+
+        mutable_data["customer_email"] = request.user.email
         # request.data._mutable = False
         print(f"After:   {request.data}")
         serializer = EnquirySerializer(
-            data=request.data,
+            data=mutable_data,
             context={"user": request.user, "id": request.data.get("room")},
         )
 
@@ -128,7 +130,7 @@ class EnquiryView(APIView):
             }
 
             email_thread = threading.Thread(
-                target=send_email_in_thread, args=(email_data,)
+                target=send_email_in_thread, args=(email_data,), daemon=True
             )
             email_thread.start()
 

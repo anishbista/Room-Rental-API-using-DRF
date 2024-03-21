@@ -89,8 +89,10 @@ class RoomAddView(APIView):
         print(f"Request data:  {request.data}")
         # for x, y in request.data.items():
         #     print(f"{x}    {y}")
-        request.data["user"] = request.user.id
-        serializer = RoomAddSerializer(data=request.data)
+        mutable_data = request.data.copy()
+        mutable_data["user"] = request.user.id
+        # request.data["user"] = request.user.id
+        serializer = RoomAddSerializer(data=mutable_data)
 
         if serializer.is_valid(raise_exception=True):
             serializer.save()

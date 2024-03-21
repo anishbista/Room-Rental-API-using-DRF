@@ -63,7 +63,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    # "common.custom_middleware.CustomErrorMiddleware",
+    "common.custom_middleware.CustomErrorMiddleware",
 ]
 
 ROOT_URLCONF = "rental_management.urls"
@@ -109,15 +109,15 @@ REST_FRAMEWORK = {
     # "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     # "PAGE_SIZE": 2,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-    "SEARCH_PARAM": "search",
+    "SEARCH_PARAM": "title",
 }
 
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "Blog API Project",
-    "DESCRIPTION": "A sample blog to learn about DRF",
+    "TITLE": "Room Rental API Project",
+    "DESCRIPTION": "Room rental",
     "VERSION": "1.0.0",
-    "SERVE_INCLUDE_SCHEMA": True,
+    "SERVE_INCLUDE_SCHEMA": False,
     # OTHER SETTINGS
 }
 
@@ -156,7 +156,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = "static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"
+# STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"

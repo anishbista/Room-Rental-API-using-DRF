@@ -44,6 +44,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             "password": {"write_only": True},
             "address": {"required": True},
             "mobile_no": {"required": True},
+            "email": {"required": True},
+            "name": {"required": True},
+            "password2": {"required": True},
             # "profile_picture": {"required": True},
         }
 
@@ -71,6 +74,11 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         #     raise serializers.ValidationError(
         #         {"message": "The maximum file size that can be uploaded is 1 MB"}
         #     )
+
+        if password is None or password2 is None:
+            raise serializers.ValidationError(
+                {"message": "Password or Confirm Password is missing."}
+            )
         if password != password2:
             raise serializers.ValidationError(
                 {"message": "Password and Confirm Password doesn't match."}
