@@ -173,7 +173,11 @@ SIMPLE_JWT = {
 
 # PASSWORD_RESET_TIMEOUT = 900  # This is used to set the time of token created while resting password through email
 
-CORS_ALLOWED_ORIGINS = ["http://127.0.0.1:5500", "http://127.0.0.1:8000"]
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:5500",
+    "http://127.0.0.1:8000",
+    "https://oriflame.softbenz.com",
+]
 
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
@@ -183,5 +187,7 @@ EMAIL_HOST_USER = os.environ.get("EMAIL_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_PASS")
 EMAIL_USE_TLS = True
 
+
+CSRF_TRUSTED_ORIGINS = ["https://oriflame.softbenz.com"]
 
 # APPEND_SLASH = False
