@@ -22,6 +22,8 @@ from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend, filters
 from django_filters import FilterSet, RangeFilter
 
+from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiResponse
+
 
 def get_object(room_id):
     return get_object_or_404(Room, id=room_id)
@@ -82,6 +84,17 @@ class RoomListView(ListAPIView):
 #         return paginator.get_paginated_response(serializer.data)
 
 
+@extend_schema_view(
+    post=extend_schema(
+        tags=["Rooms"],
+        summary="Room Create API",
+        description="Room Create API",
+        request=RoomAddSerializer,
+        responses=[
+            OpenApiResponse(examples=[{}]),
+        ],
+    ),
+)
 class RoomAddView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -127,6 +140,17 @@ class RoomDeleteView(APIView):
         )
 
 
+@extend_schema_view(
+    put=extend_schema(
+        tags=["Rooms"],
+        summary="Room Update API",
+        description="Room Update API",
+        request=RoomAddSerializer,
+        responses=[
+            OpenApiResponse(examples=[{}]),
+        ],
+    ),
+)
 class RoomUpdateView(APIView):
     permission_classes = [IsAuthenticated, IsRoomOwner]
 

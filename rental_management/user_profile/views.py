@@ -14,7 +14,7 @@ from accounts.utils import Util
 from room.serializers import RoomSerializer
 from common.pagination import CustomPagination
 import threading
-
+from drf_spectacular.utils import extend_schema, extend_schema_view
 
 # from rest_framework.decorators import extend_schema,extend_schema_view
 
@@ -31,25 +31,32 @@ class UserProfileView(generics.RetrieveAPIView):
         return self.request.user
 
 
-class UserUpdateView(generics.UpdateAPIView):
+@extend_schema_view(
+    put=extend_schema(
+        tags=["Profile"],
+        summary="Profile Update API",
+        description="Profile Update API",
+        request=UserUpdateSerializer,
+    )
+)
+class UserUpdateView(APIView):
     serializer_class = UserUpdateSerializer
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
         return self.request.user
 
-    def update(self, request, *args, **kwargs):
-        serializer = self.get_serializer(
+    def put(self, request, *args, **kwargs):
+        serializer = self.serializer_class(
             instance=self.get_object(), data=request.data, partial=True
         )
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        print(f"dsadadad: {serializer.validated_data}")
-        profile_link = (
-            request.build_absolute_uri(request.user.profile_picture.url)
-            if request.user.profile_picture
-            else None
-        )
+        if serializer.is_valid():
+            serializer.save()
+            profile_link = (
+                request.build_absolute_uri(request.user.profile_picture.url)
+                if request.user.profile_picture
+                else None
+            )
         return Response(
             {
                 "message": "Profile updated successfully",
@@ -88,6 +95,14 @@ class UserEnquiryView(generics.ListAPIView):
         return Enquiry.objects.filter(customer_email=self.request.user.email)
 
 
+@extend_schema_view(
+    post=extend_schema(
+        tags=["Profile"],
+        summary="Profile Enquiry API",
+        description="Profile Enquiry API",
+        request=EnquirySerializer,
+    )
+)
 class EnquiryView(APIView):
     permission_classes = [IsAuthenticated]
 

@@ -59,9 +59,10 @@ def get_tokens_for_user(request, user):
 
 @extend_schema_view(
     post=extend_schema(
-        tags=["Registration"],
-        description="Account registration API -description",
-        summary="Account registration API -summary",
+        tags=["User"],
+        summary="User registration API ",
+        description="User registration API ",
+        request=UserRegistrationSerializer,
     )
 )
 class UserRegistrationView(APIView):
@@ -176,6 +177,14 @@ class ActivateAccountView(APIView):
 #         return Response({"message": "Otp sent"})
 
 
+@extend_schema_view(
+    post=extend_schema(
+        tags=["User"],
+        summary="User Login API",
+        description="User Login API",
+        request=UserLoginSerializer,
+    )
+)
 class UserLoginView(APIView):
     # renderer_classes = [UserRenderer]
 
@@ -279,6 +288,13 @@ class UserLoginView(APIView):
 #             status=status.HTTP_200_OK,
 #         )
 #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+@extend_schema_view(
+    post=extend_schema(
+        tags=["User"],
+        summary="User OTP Generate API",
+        description="User OTP Generate API",
+    )
+)
 class GenerateOTPView(APIView):
     # renderer_classes = [UserRenderer]
 
@@ -330,6 +346,14 @@ class GenerateOTPView(APIView):
     #     OTP.objects.filter(created_on__lt=expired_time).delete()
 
 
+@extend_schema_view(
+    post=extend_schema(
+        tags=["User"],
+        summary="User OTP Verify API",
+        description="User OTP Verify API",
+        request=VerifyOTPSerializer,
+    ),
+)
 class VerifyOTPView(APIView):
     def post(self, request, format=None):
         serializer = VerifyOTPSerializer(data=request.data)
@@ -349,6 +373,14 @@ class VerifyOTPView(APIView):
             )
 
 
+@extend_schema_view(
+    post=extend_schema(
+        tags=["User"],
+        summary="User Reset Password API",
+        description="User Reset Password API",
+        request=ResetPasswordSerializer,
+    ),
+)
 class ResetPasswordView(APIView):
     # renderer_classes = [UserRenderer]
 
@@ -410,6 +442,14 @@ class ResetPasswordView(APIView):
 #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@extend_schema_view(
+    put=extend_schema(
+        tags=["User"],
+        summary="User Change Password API",
+        description="User Change Password API",
+        request=ChangePasswordSerializer,
+    ),
+)
 class ChangePasswordView(APIView):
     permission_classes = [IsAuthenticated]
 
