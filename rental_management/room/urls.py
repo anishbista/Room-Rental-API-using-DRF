@@ -1,5 +1,12 @@
 from django.urls import path
-from .views import *
+from .views import (
+    RoomListView,
+    RoomDeleteView,
+    RoomAddView,
+    RecentlyAdded,
+    RoomDetailView,
+    RoomUpdateView,
+)
 
 urlpatterns = [
     path("list/", RoomListView.as_view(), name="listRoom"),
