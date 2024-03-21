@@ -9,9 +9,14 @@ from .models import *
 from accounts.utils import Util
 from room.serializers import RoomSerializer
 from common.pagination import CustomPagination
+import threading
 
 
 # from rest_framework.decorators import extend_schema,extend_schema_view
+
+
+def send_email_in_thread(email_data):
+    Util.send_enquiry(email_data)
 
 
 class UserProfileView(generics.RetrieveAPIView):
@@ -118,7 +123,12 @@ class EnquiryView(APIView):
                 "receiver_email": roomname.user.email,
             }
 
-            Util.send_enquiry(email_data)
+            email_thread = threading.Thread(
+                target=send_email_in_thread, args=(email_data,)
+            )
+            email_thread.start()
+
+            # Util.send_enquiry(email_data)
             return Response(
                 {"message": "Enquired Successfully"}, status=status.HTTP_201_CREATED
             )

@@ -16,6 +16,11 @@ from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from django.http import HttpResponse
 from drf_spectacular.utils import extend_schema, extend_schema_view
+import threading
+
+
+def send_email_in_thread(email_data):
+    Util.send_email(email_data)
 
 
 def get_tokens_for_user(request, user):
@@ -70,7 +75,13 @@ class UserRegistrationView(APIView):
                 "receiver_email": email,
                 "type": "registration",
             }
-            Util.send_email(email_data)
+            email_thread = threading.Thread(
+                target=send_email_in_thread,
+                args=(email_data,),
+                daemon=True,
+            )
+            email_thread.start()
+            # Util.send_email(email_data)
             return Response(
                 {
                     "message": "Link has been sent to your email. Click the link to verify."
@@ -281,7 +292,12 @@ class GenerateOTPView(APIView):
                     "receiver_email": email,
                     "type": "otp",
                 }
-                Util.send_email(email_data)
+
+                email_thread = threading.Thread(
+                    target=send_email_in_thread, args=(email_data,)
+                )
+                email_thread.start()
+                # Util.send_email(email_data)
                 return Response(
                     {
                         "message": "Otp sent. Please check your email",
