@@ -88,3 +88,5 @@ venv/
 .env
 db.sqlite3
 celerybeat-schedule
+
+media/
