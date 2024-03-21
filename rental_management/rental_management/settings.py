@@ -27,14 +27,7 @@ SECRET_KEY = "django-insecure-!8089)kmajg5=u$#eht4kudo=p+c5gm8oal*%qgw3%a+xr&hr%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [
-    "192.168.1.81",
-    "192.168.1.67",
-    "0.0.0.0",
-    "127.0.0.1",
-    "192.168.10.218",
-    "anish9235.pythonanywhere.com",
-]
+ALLOWED_HOSTS = ["*"]
 
 
 INSTALLED_APPS = [

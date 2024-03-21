@@ -174,6 +174,8 @@ class RecentlyAdded(ListAPIView):
     pagination_class = CustomPagination
     before_two_days = timezone.now() - timedelta(days=2)
     print(f"before:    {before_two_days}")
-    queryset = Room.objects.filter(created_on__gte=before_two_days)
+    queryset = Room.objects.filter(created_on__gte=before_two_days).order_by(
+        "-created_on"
+    )
 
     serializer_class = RoomSerializer
