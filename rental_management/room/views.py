@@ -97,7 +97,7 @@ class RoomAddView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-from rest_framework.exceptions import MethodNotAllowed
+
 
 
 class RoomDetailView(APIView):
