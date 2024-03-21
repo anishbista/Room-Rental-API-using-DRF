@@ -176,6 +176,4 @@ class RecentlyAdded(ListAPIView):
     print(f"before:    {before_two_days}")
     queryset = Room.objects.filter(created_on__gte=before_two_days)
 
-    for i in queryset:
-        print(i.created_on)
     serializer_class = RoomSerializer

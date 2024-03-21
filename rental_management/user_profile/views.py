@@ -136,4 +136,4 @@ class EnquiryView(APIView):
             return Response(
                 {"message": "Enquired Successfully"}, status=status.HTTP_201_CREATED
             )
-        return Response(serializers.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
