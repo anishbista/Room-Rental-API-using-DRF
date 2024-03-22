@@ -135,6 +135,12 @@ class RoomAddSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     {"message": "The maximum file size that can be uploaded is 1 MB"}
                 )
+            if not image_data.name.lower().endswith((".jpg", ".jpeg", ".png")):
+                raise serializers.ValidationError(
+                    {
+                        "message": "Only JPEG, JPG, or PNG images are allowed to be uploaded."
+                    }
+                )
 
         return value
 
