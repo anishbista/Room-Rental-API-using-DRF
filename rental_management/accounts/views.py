@@ -109,6 +109,13 @@ class UserRegistrationView(APIView):
         return f"http://{current_site.domain}/api/user/activate/{uid}/{token}/"
 
 
+@extend_schema_view(
+    get=extend_schema(
+        tags=["User"],
+        summary="User Activated API ",
+        description="User Activate API ",
+    )
+)
 class ActivateAccountView(APIView):
     def get(self, request, uidb64, token):
         print("Im in activated")

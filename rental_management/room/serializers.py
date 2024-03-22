@@ -108,7 +108,7 @@ class RoomDetailSerializer(serializers.ModelSerializer):
 class RoomAddSerializer(serializers.ModelSerializer):
 
     amenities = serializers.ListField(child=serializers.CharField(), required=False)
-    images = serializers.ListField(child=serializers.ImageField(), write_only=True)
+    images = serializers.ListField(child=serializers.ImageField(), required=True)
 
     class Meta:
         model = Room
@@ -159,19 +159,55 @@ class RoomAddSerializer(serializers.ModelSerializer):
             print("Image is not here ")
         return room
 
-    def update(self, room, validated_data):
-        room.title = validated_data.get("title", room.title)
-        room.description = validated_data.get("description", room.description)
-        room.price = validated_data.get("price", room.price)
-        room.location = validated_data.get("location", room.location)
-        room.city = validated_data.get("city", room.city)
+
+class RoomUpdateSerializer(serializers.ModelSerializer):
+
+    amenities = serializers.ListField(child=serializers.CharField(), required=False)
+    images = serializers.ListField(child=serializers.ImageField(), required=True)
+
+    class Meta:
+        model = Room
+        fields = [
+            "title",
+            "description",
+            "price",
+            "location",
+            "city",
+            "amenities",
+            "images",
+            "is_available",
+        ]
+
+    def validate_images(self, value):
+        if len(value) > 4 or len(value) < 2:
+            raise serializers.ValidationError(
+                {"message": "Minimum 2 and Maximum 4 images should be uploaded!"}
+            )
+        for image_data in value:
+            if image_data.size > 1048576:
+                raise serializers.ValidationError(
+                    {"message": "The maximum file size that can be uploaded is 1 MB"}
+                )
+
+        return value
+
+    def update(self, instance, validated_data):
+        instance.title = validated_data.get("title", instance.title)
+        instance.description = validated_data.get("description", instance.description)
+        instance.price = validated_data.get("price", instance.price)
+        instance.location = validated_data.get("location", instance.location)
+        instance.city = validated_data.get("city", instance.city)
+        instance.is_available = validated_data.get(
+            "is_available", instance.is_available
+        )
 
         amenities_data = validated_data.get("amenities", [])
         images_data = validated_data.get("images")
 
         if amenities_data:
+            instance.amenities.all().delete()
             for item in amenities_data:
-                Amenities.object.create(room=room, item=item)
+                Amenities.objects.create(room=instance, item=item)
 
         if images_data:
             for item in images_data:
@@ -181,7 +217,7 @@ class RoomAddSerializer(serializers.ModelSerializer):
                             "message": "The maximum file size that can be uploaded is 1 MB"
                         }
                     )
-                RoomImage.objects.create(room=room, image=item)
+                RoomImage.objects.create(room=instance, image=item)
 
-        room.save()
-        return room
+        instance.save()
+        return instance

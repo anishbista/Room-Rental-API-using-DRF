@@ -4,9 +4,7 @@ from rest_framework import status, generics
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 from .serializers import (
-    AmenitiesSerializer,
-    RoomImageSerializer,
-    UserSerializer,
+    RoomUpdateSerializer,
     RoomSerializer,
     RoomDetailSerializer,
     RoomAddSerializer,
@@ -37,6 +35,13 @@ class RoomFilter(FilterSet):
         fields = ["price", "category", "city", "is_available"]
 
 
+@extend_schema_view(
+    get=extend_schema(
+        tags=["Rooms"],
+        summary="Rooms List API ",
+        description="User List API ",
+    )
+)
 class RoomListView(ListAPIView):
     pagination_class = CustomPagination
     # queryset = Room.objects.all()
@@ -120,6 +125,13 @@ class RoomAddView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@extend_schema_view(
+    get=extend_schema(
+        tags=["Rooms"],
+        summary="Rooms Detail API ",
+        description="User Detail API ",
+    )
+)
 class RoomDetailView(APIView):
     serializer_class = RoomDetailSerializer
 
@@ -129,6 +141,16 @@ class RoomDetailView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+@extend_schema_view(
+    delete=extend_schema(
+        tags=["Rooms"],
+        summary="Room Delete API",
+        description="Room Delete API",
+        responses=[
+            OpenApiResponse(examples=[{}]),
+        ],
+    ),
+)
 class RoomDeleteView(APIView):
     permission_classes = [IsAuthenticated, IsRoomOwner]
 
@@ -145,7 +167,7 @@ class RoomDeleteView(APIView):
         tags=["Rooms"],
         summary="Room Update API",
         description="Room Update API",
-        request=RoomAddSerializer,
+        request=RoomUpdateSerializer,
         responses=[
             OpenApiResponse(examples=[{}]),
         ],
@@ -167,11 +189,9 @@ class RoomUpdateView(APIView):
 
         print(request.user == room.user)
 
-        data = request.data.copy()
-        data.pop("images", None)
-        print(f"imagesssssssssssS:{data}")
+        print(f"imagesssssssssssS:{request.data}")
 
-        serializer = RoomAddSerializer(room, data=data, partial=True)
+        serializer = RoomUpdateSerializer(room, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(
@@ -196,6 +216,13 @@ class RoomUpdateView(APIView):
         # )
 
 
+@extend_schema_view(
+    get=extend_schema(
+        tags=["Rooms"],
+        summary="Recently Added API ",
+        description="Recently Added API ",
+    )
+)
 class RecentlyAdded(ListAPIView):
     pagination_class = CustomPagination
     before_two_days = timezone.now() - timedelta(days=2)

@@ -23,6 +23,13 @@ def send_email_in_thread(email_data):
     Util.send_enquiry(email_data)
 
 
+@extend_schema_view(
+    get=extend_schema(
+        tags=["Profile"],
+        summary="User Profile View API ",
+        description="User Profile View API ",
+    )
+)
 class UserProfileView(generics.RetrieveAPIView):
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]
@@ -34,8 +41,8 @@ class UserProfileView(generics.RetrieveAPIView):
 @extend_schema_view(
     put=extend_schema(
         tags=["Profile"],
-        summary="Profile Update API",
-        description="Profile Update API",
+        summary="User Profile Update API",
+        description="User Profile Update API",
         request=UserUpdateSerializer,
     )
 )
@@ -50,6 +57,7 @@ class UserUpdateView(APIView):
         serializer = self.serializer_class(
             instance=self.get_object(), data=request.data, partial=True
         )
+        profile_link = None
         if serializer.is_valid():
             serializer.save()
             profile_link = (
@@ -57,16 +65,18 @@ class UserUpdateView(APIView):
                 if request.user.profile_picture
                 else None
             )
-        return Response(
-            {
-                "message": "Profile updated successfully",
-                "name": request.user.name,
-                "mobile_no": request.user.mobile_no,
-                "address": request.user.address,
-                "email": request.user.email,
-                "profile_picture": profile_link,
-            }
-        )
+            return Response(
+                {
+                    "message": "Profile updated successfully",
+                    "name": request.user.name,
+                    "mobile_no": request.user.mobile_no,
+                    "address": request.user.address,
+                    "email": request.user.email,
+                    "profile_picture": profile_link,
+                }
+            )
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 # class UserUpdateView(generics.UpdateAPIView):
@@ -77,29 +87,45 @@ class UserUpdateView(APIView):
 #         return self.request.user
 
 
+@extend_schema_view(
+    get=extend_schema(
+        tags=["Profile"],
+        summary="User Room List API ",
+        description="User Room List API ",
+    )
+)
 class UserRoomView(generics.ListAPIView):
     serializer_class = RoomSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = CustomPagination
 
     def get_queryset(self):
-        return Room.objects.filter(user=self.request.user)
+        return Room.objects.filter(user=self.request.user).order_by("-created_on")
 
 
+@extend_schema_view(
+    get=extend_schema(
+        tags=["Profile"],
+        summary="User Enquiry List API ",
+        description="User Enquiry List API ",
+    )
+)
 class UserEnquiryView(generics.ListAPIView):
     serializer_class = EnquirySerializer
     permission_classes = [IsAuthenticated]
     pagination_class = CustomPagination
 
     def get_queryset(self):
-        return Enquiry.objects.filter(customer_email=self.request.user.email)
+        return Enquiry.objects.filter(customer_email=self.request.user.email).order_by(
+            "-created_on"
+        )
 
 
 @extend_schema_view(
     post=extend_schema(
         tags=["Profile"],
-        summary="Profile Enquiry API",
-        description="Profile Enquiry API",
+        summary="User Enquiry API",
+        description="User Enquiry API",
         request=EnquirySerializer,
     )
 )

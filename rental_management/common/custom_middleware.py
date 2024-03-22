@@ -12,4 +12,8 @@ class CustomErrorMiddleware:
                 "Internal Server Error Occurred. Please contact support"
             )
             return JsonResponse({"message": problem_description}, status=500)
+        elif response.status_code == 404:
+            problem_description = "Page Not Found"
+            return JsonResponse({"message": problem_description}, status=404)
+
         return response

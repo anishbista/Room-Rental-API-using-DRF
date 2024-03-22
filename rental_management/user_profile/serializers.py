@@ -24,10 +24,16 @@ class UserUpdateSerializer(serializers.ModelSerializer):
     def is_valid(self, *, raise_exception=False):
         data = self.initial_data
         mobile_no = data.get("mobile_no")
+        profile_picture = data.get("profile_picture")
         if mobile_no and len(mobile_no) != 10:
             raise serializers.ValidationError(
                 {"message": "Mobile number should be 10 digits"}
             )
+        if profile_picture.size > 1048576:
+            raise serializers.ValidationError(
+                {"message": "The maximum file size that can be uploaded is 1 MB"}
+            )
+
         return super().is_valid(raise_exception=raise_exception)
 
 
