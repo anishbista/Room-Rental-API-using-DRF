@@ -261,12 +261,13 @@ class RoomUpdateSerializer(serializers.ModelSerializer):
         print(f"Length of result     {len(result)}")
 
         print(f"dsadadad    {removed_images}")
-        for room_id in removed_images:
-            try:
-                image_to_delete = RoomImage.objects.get(id=room_id)
-                image_to_delete.delete()
-            except RoomImage.DoesNotExist:
-                pass
+        if result:
+            for room_id in removed_images:
+                try:
+                    image_to_delete = RoomImage.objects.get(id=room_id)
+                    image_to_delete.delete()
+                except RoomImage.DoesNotExist:
+                    pass
 
         instance.title = validated_data.get("title", instance.title)
         instance.description = validated_data.get("description", instance.description)
