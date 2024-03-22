@@ -29,7 +29,8 @@ class UserUpdateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {"message": "Mobile number should be 10 digits"}
             )
-        if profile_picture.size > 1048576:
+
+        if profile_picture and profile_picture.size > 1048576:
             raise serializers.ValidationError(
                 {"message": "The maximum file size that can be uploaded is 1 MB"}
             )
@@ -40,12 +41,20 @@ class UserUpdateSerializer(serializers.ModelSerializer):
 class EnquirySerializer(serializers.ModelSerializer):
     customer_email = serializers.EmailField(write_only=True)
     room_name = serializers.CharField(source="room.title", read_only=True)
+    room_availability = serializers.CharField(
+        source="room.is_available", read_only=True
+    )
+    room_city = serializers.CharField(source="room.city", read_only=True)
+    created_on = serializers.DateTimeField(format="%Y-%m-%d", read_only=True)
 
     class Meta:
         model = Enquiry
         fields = [
-            "room_name",
+            "created_on",
             "room",
+            "room_name",
+            "room_availability",
+            "room_city",
             "customer_email",
             "name",
             "mobile_no",
@@ -55,13 +64,6 @@ class EnquirySerializer(serializers.ModelSerializer):
     def is_valid(self, *, raise_exception=False):
         data = self.initial_data
         mobile_no = data.get("mobile_no")
-        if mobile_no and len(mobile_no) != 10:
-            raise serializers.ValidationError(
-                {"message": "Mobile number should be 10 digits"}
-            )
-        return super().is_valid(raise_exception=raise_exception)
-
-    def validate(self, data):
         room_id = self.context["id"]
         user = self.context["user"]
 
@@ -72,7 +74,11 @@ class EnquirySerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {"message": "Enquiring own room not allowed!"}
             )
-        return data
+        if mobile_no and len(mobile_no) != 10:
+            raise serializers.ValidationError(
+                {"message": "Mobile number should be 10 digits"}
+            )
+        return super().is_valid(raise_exception=raise_exception)
 
     def create(self, validated_data):
         return Enquiry.objects.create(**validated_data)

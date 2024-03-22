@@ -13,6 +13,6 @@ class AmenitiesStackedInLine(admin.StackedInline):
 
 @admin.register(Room)
 class RoomAdmin(admin.ModelAdmin):
-    list_display = ["user", "title", "category", "price", "is_available"]
+    list_display = ["user", "title", "category", "price", "city", "is_available"]
     date_hierarchy = "created_on"
     inlines = [AmenitiesStackedInLine, RoomImageStackedInLine]

@@ -47,7 +47,7 @@ class RoomListView(ListAPIView):
     # queryset = Room.objects.all()
     serializer_class = RoomSerializer
     filter_backends = [SearchFilter, DjangoFilterBackend]
-    search_fields = ["^title"]
+    search_fields = ["title"]
     # filterset_fields = ["city", "category"]
     filterset_class = RoomFilter
     ordering = ["-created_on"]
