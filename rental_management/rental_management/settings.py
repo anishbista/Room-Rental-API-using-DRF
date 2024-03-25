@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-!8089)kmajg5=u$#eht4kudo=p+c5gm8oal*%qgw3%a+xr&hr%"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
@@ -191,3 +191,6 @@ EMAIL_USE_TLS = True
 CSRF_TRUSTED_ORIGINS = ["https://oriflame.softbenz.com"]
 
 # APPEND_SLASH = False
+
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880
+DATA_UPLOAD_MAX_MEMORY_SIZE = None

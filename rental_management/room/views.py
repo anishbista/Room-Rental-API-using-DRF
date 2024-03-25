@@ -32,7 +32,7 @@ class RoomFilter(FilterSet):
 
     class Meta:
         model = Room
-        fields = ["price", "category", "city", "is_available"]
+        fields = ["price", "category", "location", "city", "is_available"]
 
 
 @extend_schema_view(
@@ -107,7 +107,9 @@ class RoomAddView(APIView):
         print(f"Request data:  {request.data}")
         # for x, y in request.data.items():
         #     print(f"{x}    {y}")
-        mutable_data = request.data.copy()
+        # mutable_data = request.data.copy()
+        mutable_data = request.data
+
         mutable_data["user"] = request.user.id
         # request.data["user"] = request.user.id
         serializer = RoomAddSerializer(data=mutable_data)
