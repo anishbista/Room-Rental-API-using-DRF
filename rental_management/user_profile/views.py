@@ -127,6 +127,7 @@ class UserEnquiryView(generics.ListAPIView):
         summary="User Enquiry API",
         description="User Enquiry API",
         request=EnquirySerializer,
+        # responses={201: EnquirySerializer},
     )
 )
 class EnquiryView(APIView):

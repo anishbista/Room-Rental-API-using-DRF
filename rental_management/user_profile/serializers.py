@@ -70,6 +70,9 @@ class EnquirySerializer(serializers.ModelSerializer):
         room_user = Room.objects.filter(id=room_id).first()
         print(f"room  {room_user.user.email}        user: {user.email}")
 
+        if not room_user.is_available:
+            raise serializers.ValidationError({"message": "Room is not available!"})
+
         if room_user.user.email == user.email:
             raise serializers.ValidationError(
                 {"message": "Enquiring own room not allowed!"}

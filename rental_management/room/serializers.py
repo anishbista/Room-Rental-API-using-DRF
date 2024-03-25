@@ -253,21 +253,21 @@ class RoomUpdateSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         removed_images = validated_data.pop("removed_images", [])
-        images_data = validated_data.pop("images")
+        images_data = validated_data.pop("images", [])
         result = None
         if images_data:
             result = self.validate_image(images_data)
 
-        print(f"Length of result     {len(result)}")
+        print(f"Length of removed images {len(removed_images)}")
 
-        print(f"dsadadad    {removed_images}")
-        if result:
-            for room_id in removed_images:
-                try:
-                    image_to_delete = RoomImage.objects.get(id=room_id)
-                    image_to_delete.delete()
-                except RoomImage.DoesNotExist:
-                    pass
+        for room_id in removed_images:
+            try:
+                image_to_delete = RoomImage.objects.get(id=room_id)
+                image_to_delete.delete()
+            except RoomImage.DoesNotExist:
+                raise serializers.ValidationError(
+                    {"message": "This id doesn't have image to delete!!"}
+                )
 
         instance.title = validated_data.get("title", instance.title)
         instance.description = validated_data.get("description", instance.description)
