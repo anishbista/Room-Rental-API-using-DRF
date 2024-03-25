@@ -23,7 +23,7 @@ Room Rental API is a RESTful API designed for a room rental platform. It facilit
 
 1. **Clone the repository:**
 ```bash
-git clone https://github.com/anishbista/Room-Rental-API.git
+git clone https://github.com/anishbista/Room-Rental-API-using-DRF.git
 ```
 ## Installation
 
